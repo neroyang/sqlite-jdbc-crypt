@@ -23,7 +23,7 @@ endif
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_SOURCE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
-	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone -b "$(version)" https://github.com/Willena/libsqlite3-crypt-auth.git $(TARGET)/$(version); sed -E 's|<version>(.*)-SNAPSHOT</version>|<version>'"$version"'-SNAPSHOT</version>|g' pom.xml > pom2.xml ;  mv pom2.xml pom.xml; fi
+	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone -b "$(version)" https://github.com/Willena/libsqlite3-crypt-auth.git $(TARGET)/$(version); sed -E 's|<version>(.*)-SNAPSHOT</version>|<version>'"$(version)"'-SNAPSHOT</version>|g' pom.xml > pom2.xml ;  mv pom2.xml pom.xml; fi
 	@mkdir -p $(@D)
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
