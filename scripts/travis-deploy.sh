@@ -15,4 +15,10 @@ set -ev
 #fi;
 
 make;
-ls /home/travis/build/Willena/sqlite-jdbc-crypt/target/
+#ls /home/travis/build/Willena/sqlite-jdbc-crypt/target/
+git config credential.helper "store --file=.git/credentials"
+echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+. ./VERSION
+git tag $version
+git push origin --tags
+

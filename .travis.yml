@@ -23,12 +23,6 @@ env:
   global:
     secure: KSF/j/i5n5KqAMnRmwG8zMZGn3FnXtUNCqGhI8U+i2ByhYYHHehchfPB+pzj7ciRiFJeSVcVDa2AofOh5svxG2SIl2GYVaHLzcZpxQAEsPaCzpMiecbGXYBQSqlyoSsjsGasz5iWeulpNinmvC23UMXpl22/hQWcYxxgkdmlCEmZ7+Aof149550DTA/hSHxfpJd/eEnz5+2OGQVZNaMIYfGIkY64AQ1TWXnLbFzowjXPRNQZfNzgaBE7v38oUjsAeg6XB7rtAPrEkZhunDQnhg9UXM2oolrvWHV4hZX2wyjlDNTmLvOVG+PO5P1mhADY+NUFGLbdFmmAQef8ABfLn78iZ1IDuO/WcqCTRdAGcZ3JGyjVxlYtKT95lr46aDr7cpz+x4bUcl3rBE4+pep3j65bywgJ+tcj33rHesrh+3WuYuTp25nLhKZitHX5AgS3ULXSPVhX26jmJgWdc4THe0+QTSqZa9fB54UDMxWZH1QsYD3xJmezbnO7ngxsRDhyOHjxqxVAdDQQkalmmhN2gTxT9UOwIA9935el4UaLgE+28HQzQVTvSsfjs53YL7IKiuDSOP/N/0QFGc0cl5oegRvLXNktWsiWCUPnGIGt5Lnam0Eb9hBeDYYSRd54nUtSVjd8roPARz9zCXlthEUcOlEIgXWUEYANJaB/meT+Urw=
 
-before_deploy:
-  - git config credential.helper "store --file=.git/credentials"
-  - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
-  - . ./VERSION
-  - git tag $version
-  - git push origin --tags
 
 deploy:
   provider: releases
