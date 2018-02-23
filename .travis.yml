@@ -1,4 +1,6 @@
-sudo: required
+sudo: false
+os: linux
+dist: trusty
 
 services:
   - docker
@@ -6,7 +8,8 @@ services:
 language: java
 
 jdk:
-  - openjdk6
+# Unable to use openjdk6 https://github.com/travis-ci/travis-ci/issues/8199
+#  - openjdk6
   - openjdk7
   - oraclejdk8
 
@@ -33,4 +36,3 @@ deploy:
     secure: JpSHV0NkcAp/v0w0aEddIBhxTCdYvBG8wxWLYBh318Daxgg7e38HC4XBETbVWXv/JwI8FvV+KXtY09nKo7HTCHDeMvjx9KHJOVXANW0PmqAiN2/qr/4d48TL+fh5yEfIPyv961M+P4/lCOysGgFDPI5HtR+2mpuoM6fA77MTR7nIC33sgCUDI1lqbUGc5ce5R0Q9Kh8i4JBZpFsrhg9W7cD1gJoq2Pp0bfdkeuwnX2vo9ysYa/hi9/KdbxcBtTuSAsSGmZ773en2LM2gX8t65lpPlKJbm9TjKyhrtSzszj4ZfT9BqnoUYRUMK0gA3+w+WZaedoRS5E6LrTE2xVL0YinljTyAxTXXZQD2iaMOi3k+helw6RULaGseKt8I4cK1kvLur8rvNRpUEKTQOnyc79J/5L83vvq7svEfkM0XP9HPteahMEhTyCDetro1Ux3OItfQGrH2BN03V2kO1CJlGvQvEU3aEUYzXnspfTB2b8kG1hF+wXwZ7qUQxP1A1bcVu08Ov8Y3zBht7D626jkmv5fgHx4kp2RRlBpyJWSvzbf2sFm/l1Yr3cd+QaX5CYJqhRSmNjMtz5cuBgDsQhiqXFXV1JqySorcvXtDV0uPe3em/fdeU6/A9Ryf1aa9ZbMEK2K1XZOtCyA/1jgBbt2xrEKI2h33CCGBGAsAjSrm3cg=
   on:
     tags: true
-

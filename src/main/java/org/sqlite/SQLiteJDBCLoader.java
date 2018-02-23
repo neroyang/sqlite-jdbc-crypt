@@ -56,7 +56,7 @@ public class SQLiteJDBCLoader {
      * @return True if SQLite native library is successfully loaded; false
      * otherwise.
      */
-    public static boolean initialize() throws Exception {
+    public static synchronized boolean initialize() throws Exception {
         // only cleanup before the first extract
         if(!extracted) {
             cleanup();
@@ -85,7 +85,7 @@ public class SQLiteJDBCLoader {
         });
         if(nativeLibFiles != null) {
             for(File nativeLibFile : nativeLibFiles) {
-                File lckFile = new File(nativeLibFile.getName() + ".lck");
+                File lckFile = new File(nativeLibFile.getAbsolutePath() + ".lck");
                 if(!lckFile.exists()) {
                     try {
                         nativeLibFile.delete();
@@ -200,6 +200,9 @@ public class SQLiteJDBCLoader {
         try {
             // Extract a native library file into the target directory
             InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
+            if(!extractedLckFile.exists()) {
+                new FileOutputStream(extractedLckFile).close();
+            }
             FileOutputStream writer = new FileOutputStream(extractedLibFile);
             try {
                 byte[] buffer = new byte[8192];
@@ -209,9 +212,6 @@ public class SQLiteJDBCLoader {
                 }
             }
             finally {
-                if(!extractedLckFile.exists()) {
-                    new FileOutputStream(extractedLckFile).close();
-                }
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.deleteOnExit();
                 extractedLckFile.deleteOnExit();
@@ -264,7 +264,7 @@ public class SQLiteJDBCLoader {
      * @param name Name  of the native library.
      * @return True for successfully loading; false otherwise.
      */
-    private static synchronized boolean loadNativeLibrary(String path, String name) {
+    private static boolean loadNativeLibrary(String path, String name) {
         File libPath = new File(path, name);
         if(libPath.exists()) {
 

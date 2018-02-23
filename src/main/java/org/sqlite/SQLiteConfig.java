@@ -119,9 +119,28 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.DATE_PRECISION.pragmaName);
         pragmaParams.remove(Pragma.DATE_CLASS.pragmaName);
         pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
+        pragmaParams.remove(Pragma.PASSWORD.pragmaName);
+        pragmaParams.remove(Pragma.HEXKEY_MODE.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
+            if(pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
+                String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
+                if(password != null && !password.isEmpty()) {
+                    String hexkeyMode = pragmaTable.getProperty(Pragma.HEXKEY_MODE.pragmaName);
+                    String passwordPragma; 
+                    if(HexKeyMode.SSE.name().equalsIgnoreCase(hexkeyMode)) {
+                        passwordPragma = "pragma hexkey = '%s'";
+                    }else if(HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
+                        passwordPragma = "pragma key = \"x'%s'\"";
+                    } else {
+                        passwordPragma = "pragma key = '%s'";
+                    }
+                    stat.execute(String.format(passwordPragma, password.replace("'", "''")));
+                    stat.execute("select 1 from sqlite_master");
+                }
+            }
+            
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
                 if (!pragmaParams.contains(key)) {
@@ -246,6 +265,7 @@ public class SQLiteConfig
 
         // Pragmas that can be set after opening the database
         CACHE_SIZE("cache_size"),
+        MMAP_SIZE("mmap_size"),
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
         DEFAULT_CACHE_SIZE("default_cache_size"),
@@ -264,18 +284,22 @@ public class SQLiteConfig
         READ_UNCOMMITED("read_uncommited", OnOff),
         RECURSIVE_TRIGGERS("recursive_triggers", OnOff),
         REVERSE_UNORDERED_SELECTS("reverse_unordered_selects", OnOff),
+        SECURE_DELETE("secure_delete", new String[] { "true", "false", "fast" }),
         SHORT_COLUMN_NAMES("short_column_names", OnOff),
         SYNCHRONOUS("synchronous", toStringArray(SynchronousMode.values())),
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
-
+        APPLICATION_ID("application_id"),
+        
         // Others
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
-        BUSY_TIMEOUT("busy_timeout", null);
+        BUSY_TIMEOUT("busy_timeout", null),
+        HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
+        PASSWORD("password", null);
 
         public final String   pragmaName;
         public final String[] choices;
@@ -674,13 +698,33 @@ public class SQLiteConfig
     }
 
     /**
+     * Changes the setting of the "hexkey" flag.
+     * @param mode One of {@link HexKeyMode}:<ul>
+     * <li> NONE - SQLite uses a string based password</li>
+     * <li> SSE - the SQLite database engine will use pragma hexkey = '' to set the password</li>
+     * <li> SQLCIPHER - the SQLite database engine calls pragma key = "x''" to set the password</li></ul>
+     */
+    public void setHexKeyMode(HexKeyMode mode) {
+        setPragma(Pragma.HEXKEY_MODE, mode.name());
+    }
+
+    public static enum HexKeyMode implements PragmaValue {
+        NONE, SSE, SQLCIPHER;
+
+        public String getValue() {
+            return name();
+        }
+
+    }
+
+    /**
      * Changes the setting of the "temp_store" parameter.
      * @param storeType One of {@link TempStore}:<ul>
      * <li> DEFAULT - the compile-time C preprocessor macro SQLITE_TEMP_STORE
      * is used to determine where temporary tables and indices are stored</li>
-     * <li>FILE - temporary tables and indices are kept in as if they were pure
+     * <li>FILE - temporary tables and indices are stored in a file.</li></ul>
+     * <li>MEMORY - temporary tables and indices are kept in as if they were pure
      * in-memory databases memory</li>
-     * <li>MEMORY - temporary tables and indices are stored in a file.</li></ul>
      * @see <a
      *      href="http://www.sqlite.org/pragma.html#pragma_temp_store">www.sqlite.org/pragma.html#pragma_temp_store</a>
      */
@@ -707,6 +751,19 @@ public class SQLiteConfig
      */
     public void setUserVersion(int version) {
         set(Pragma.USER_VERSION, version);
+    }
+    
+     /**
+     * Set the value of the application-id. The application-id is not used
+     * internally by SQLite. Applications that use SQLite as their application file-format 
+     * should set the Application ID integer to a unique integer so that utilities such as file(1) 
+     * can determine the specific file type. The
+     * value is stored in the database header at offset 68.
+     * @param id A big-endian 32-bit unsigned integer.
+     * @see <a href="http://sqlite.org/pragma.html#pragma_application_id">www.sqlite.org/pragma.html#pragma_application_id</a>
+     */
+    public void setApplicationId(int id){
+        set(Pragma.APPLICATION_ID, id);
     }
 
     public static enum TransactionMode implements PragmaValue {
