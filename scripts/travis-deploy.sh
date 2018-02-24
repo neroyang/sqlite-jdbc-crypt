@@ -5,7 +5,7 @@ _BASE_DIR=$_SCRIPT_DIR/../
 _REPO_URL="https://github.com/Willena/sqlite-jdbc-crypt.git"
 
 source $_SCRIPT_DIR/git-config.sh
-set -ev
+set -evx
 
 #VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.2.1:exec)
 

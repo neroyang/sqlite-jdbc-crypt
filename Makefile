@@ -48,7 +48,7 @@ clean: clean-target clean-native clean-java clean-tests
 
 $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	@mkdir -p $(@D)
-	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3ext.h $(SQLITE_OUT)/sqlite3ext.h
+	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/*.h $(SQLITE_OUT)/
 	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3secure.c $(SQLITE_OUT)/sqlite3secure.c
 	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3.c $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CCFLAGS) \
@@ -74,7 +74,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 				-DSQLITE_ENABLE_SERIES \
 				-DSQLITE_USE_URI \
 				-DSQLITE_USER_AUTHENTICATION \
-				-DCODEC_TYPE=CODEC_TYPE_$(CODEC_TYPE) \ 
+				-DCODEC_TYPE=CODEC_TYPE_$(CODEC_TYPE) \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3secure.c
 
