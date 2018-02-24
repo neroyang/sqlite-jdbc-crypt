@@ -17,7 +17,7 @@ Prerequisites
 Build
 -----
 
-1.	Edit the `VERSION` file and set the SQLite version to use corresponding to one of the github tags of https://github.com/Willena/libsqlite3-crypt-auth ( current is 3.18.0 )
+1.	Edit the `VERSION` file and set the SQLite version to use corresponding to one of the github tags of https://github.com/Willena/sqlite-jdbc-crypt.git ( current is 3.x.x )
 2.	Edit the version number in `pom.xml` to match `VERSION`.
 3.	Then, run:
 

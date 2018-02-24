@@ -1,7 +1,7 @@
 NOTE
 ====
 
-This is not the original version from xerial.org. It is a fork of the original. This version include and use https://github.com/Willena/libsqlite3-crypt-auth as the native librairy. So the output jar is equivalent to xerial's one. This one includes some functionalities such as encryption and user authentication. Thanks to https://github.com/utelle/wxsqlite3 project that added these improvement, this library can now be updated in order to support these new functionalities.
+This is not the original version from xerial.org. It is a fork of the original. This version include and use https://github.com/Willena/libsqlite3-wx-see as the native librairy. So the output jar is equivalent to xerial's one. This one includes some functionalities such as encryption and user authentication. Thanks to https://github.com/utelle/wxsqlite3 project that added these improvement, this library can now be updated in order to support these new functionalities.
 
 SQLite JDBC Driver
 ==================

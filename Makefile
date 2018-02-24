@@ -23,7 +23,7 @@ endif
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_SOURCE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
-	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone -b "$(version)" https://github.com/Willena/libsqlite3-crypt-auth.git $(TARGET)/$(version); sed -E 's|<version>(.*)-SNAPSHOT</version>|<version>'"$(version)"'-SNAPSHOT</version>|g' pom.xml > pom2.xml ;  mv pom2.xml pom.xml; fi
+	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone -b "$(version)" https://github.com/Willena/libsqlite3-wx-see.git $(TARGET)/$(version); fi
 	@mkdir -p $(@D)
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
@@ -52,26 +52,29 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3secure.c $(SQLITE_OUT)/sqlite3secure.c
 	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3.c $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CCFLAGS) \
-	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
-	    -DSQLITE_ENABLE_COLUMN_METADATA \
-	    -DSQLITE_CORE \
-	    -DSQLITE_ENABLE_FTS3 \
-	    -DSQLITE_ENABLE_FTS3_PARENTHESIS \
-	    -DSQLITE_ENABLE_FTS5 \
-	    -DSQLITE_ENABLE_JSON1 \
-	    -DSQLITE_ENABLE_RTREE \
-	    -DSQLITE_ENABLE_STAT2 \
-	    -DSQLITE_THREADSAFE=1 \
-	    -DSQLITE_SOUNDEX \
-	    -DSQLITE_HAS_CODEC \
-	    -DSQLITE_SECURE_DELETE \
-	    -DSQLITE_ENABLE_EXTFUNC \
-	    -DSQLITE_ENABLE_CSV \
-	    -DSQLITE_ENABLE_SHA3 \
-	    -DSQLITE_USE_URI \
-	    -DSQLITE_USER_AUTHENTICATION \
-	    -DCODEC_TYPE=CODEC_TYPE_AES256 \
-	    -DSQLITE_ENABLE_FTS4 \
+				-DNDEBUG \
+				-DTHREADSAFE=1 \
+				-DSQLITE_MAX_ATTACHED=10 \
+				-DSQLITE_SOUNDEX \
+				-DSQLITE_ENABLE_COLUMN_METADATA \
+				-DSQLITE_HAS_CODEC=1 \
+				-DSQLITE_SECURE_DELETE \
+				-DSQLITE_ENABLE_FTS3 \
+				-DSQLITE_ENABLE_FTS3_PARENTHESIS \
+				-DSQLITE_ENABLE_FTS4 \
+				-DSQLITE_ENABLE_FTS5 \
+				-DSQLITE_ENABLE_JSON1 \
+				-DSQLITE_ENABLE_RTREE \
+				-DSQLITE_CORE \
+				-DSQLITE_ENABLE_EXTFUNC \
+				-DSQLITE_ENABLE_CSV \
+				-DSQLITE_ENABLE_SHA3 \
+				-DSQLITE_ENABLE_CARRAY \
+				-DSQLITE_ENABLE_FILEIO \
+				-DSQLITE_ENABLE_SERIES \
+				-DSQLITE_USE_URI \
+				-DSQLITE_USER_AUTHENTICATION \
+				-DCODEC_TYPE=CODEC_TYPE_$(CODEC_TYPE) \ 
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3secure.c
 

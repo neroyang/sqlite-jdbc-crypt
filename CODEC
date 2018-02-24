@@ -1,0 +1,8 @@
+#File to be included in Makefile in order to select the CODEC_TYPE
+
+#Default is AES256. If you wan't to change, just pass another type.
+# TYPES are AES128 or AES256 !
+
+ifndef CODEC_TYPE
+  CODEC_TYPE=AES256
+endif

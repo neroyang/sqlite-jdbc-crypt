@@ -7,32 +7,37 @@ services:
 
 language: java
 
-jdk:
-# Unable to use openjdk6 https://github.com/travis-ci/travis-ci/issues/8199
-#  - openjdk6
-  - openjdk7
-  - oraclejdk8
+matrix:
+  include:
+    - jdk: openjdk7
+      if: type != cron AND type != api
+      env: TYPE=AES128
+    - jdk: oraclejdk8
+      if: type != cron AND type != api
+      env: TYPE=AES128
+    - jdk: openjdk7
+      if: type != cron AND type != api
+      env: TYPE=AES256
+    - jdk: oraclejdk8
+      if: type != cron AND type != api
+      env: TYPE=AES256
+    - jdk: oraclejdk8
+      if: type = cron OR type = api
 
 script:
-  - ./scripts/travis-deploy.sh
-
-before_install:
-  - wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
-  - unzip -qq apache-maven-3.1.1-bin.zip
-  - export M2_HOME=$PWD/apache-maven-3.1.1
-  - export PATH=$M2_HOME/bin:$PATH
-
-env:
-  global:
-    secure: KSF/j/i5n5KqAMnRmwG8zMZGn3FnXtUNCqGhI8U+i2ByhYYHHehchfPB+pzj7ciRiFJeSVcVDa2AofOh5svxG2SIl2GYVaHLzcZpxQAEsPaCzpMiecbGXYBQSqlyoSsjsGasz5iWeulpNinmvC23UMXpl22/hQWcYxxgkdmlCEmZ7+Aof149550DTA/hSHxfpJd/eEnz5+2OGQVZNaMIYfGIkY64AQ1TWXnLbFzowjXPRNQZfNzgaBE7v38oUjsAeg6XB7rtAPrEkZhunDQnhg9UXM2oolrvWHV4hZX2wyjlDNTmLvOVG+PO5P1mhADY+NUFGLbdFmmAQef8ABfLn78iZ1IDuO/WcqCTRdAGcZ3JGyjVxlYtKT95lr46aDr7cpz+x4bUcl3rBE4+pep3j65bywgJ+tcj33rHesrh+3WuYuTp25nLhKZitHX5AgS3ULXSPVhX26jmJgWdc4THe0+QTSqZa9fB54UDMxWZH1QsYD3xJmezbnO7ngxsRDhyOHjxqxVAdDQQkalmmhN2gTxT9UOwIA9935el4UaLgE+28HQzQVTvSsfjs53YL7IKiuDSOP/N/0QFGc0cl5oegRvLXNktWsiWCUPnGIGt5Lnam0Eb9hBeDYYSRd54nUtSVjd8roPARz9zCXlthEUcOlEIgXWUEYANJaB/meT+Urw=
-
+  - echo $TRAVIS_EVENT_TYPE
+  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip ; fi
+  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then unzip -qq apache-maven-3.1.1-bin.zip ; fi
+  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then export M2_HOME=$PWD/apache-maven-3.1.1 ; fi
+  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then export PATH=$M2_HOME/bin:$PATH; fi
+  - if  [ "$TRAVIS_EVENT_TYPE" == "cron" ] || [ "$TRAVIS_EVENT_TYPE" == "api" ] ; then bash ./scripts/keepSync.sh ; else bash ./scripts/travis-deploy.sh; fi
 
 deploy:
   provider: releases
-  skip_cleanup: true
+  api_key: $GH_TOKEN
+  overwrite: true
   file_glob: true
   file: /home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-*-SNAPSHOT.jar
-  api_key:
-    secure: JpSHV0NkcAp/v0w0aEddIBhxTCdYvBG8wxWLYBh318Daxgg7e38HC4XBETbVWXv/JwI8FvV+KXtY09nKo7HTCHDeMvjx9KHJOVXANW0PmqAiN2/qr/4d48TL+fh5yEfIPyv961M+P4/lCOysGgFDPI5HtR+2mpuoM6fA77MTR7nIC33sgCUDI1lqbUGc5ce5R0Q9Kh8i4JBZpFsrhg9W7cD1gJoq2Pp0bfdkeuwnX2vo9ysYa/hi9/KdbxcBtTuSAsSGmZ773en2LM2gX8t65lpPlKJbm9TjKyhrtSzszj4ZfT9BqnoUYRUMK0gA3+w+WZaedoRS5E6LrTE2xVL0YinljTyAxTXXZQD2iaMOi3k+helw6RULaGseKt8I4cK1kvLur8rvNRpUEKTQOnyc79J/5L83vvq7svEfkM0XP9HPteahMEhTyCDetro1Ux3OItfQGrH2BN03V2kO1CJlGvQvEU3aEUYzXnspfTB2b8kG1hF+wXwZ7qUQxP1A1bcVu08Ov8Y3zBht7D626jkmv5fgHx4kp2RRlBpyJWSvzbf2sFm/l1Yr3cd+QaX5CYJqhRSmNjMtz5cuBgDsQhiqXFXV1JqySorcvXtDV0uPe3em/fdeU6/A9Ryf1aa9ZbMEK2K1XZOtCyA/1jgBbt2xrEKI2h33CCGBGAsAjSrm3cg=
+  skip_cleanup: true
   on:
     tags: true
