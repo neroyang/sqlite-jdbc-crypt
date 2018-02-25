@@ -23,7 +23,8 @@ endif
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_SOURCE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
-	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone -b "$(version)" https://github.com/Willena/libsqlite3-wx-see.git $(TARGET)/$(version); fi
+	sed -ire "s|\(<version>\)\(.*\)\(\-SNAPSHOT<\/version>\)|\1$(version)-$(CODEC_TYPE)\3|g" pom.xml
+	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone https://github.com/Willena/libsqlite3-wx-see.git $(TARGET)/$(version); cd $(TARGET)/$(version); git checkout $(version);  fi
 	@mkdir -p $(@D)
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
@@ -95,7 +96,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-ppc64
+native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-ppc64
 
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
