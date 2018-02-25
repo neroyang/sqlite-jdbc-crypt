@@ -1,14 +1,14 @@
 NOTE
 ====
 
-This is not the original version from xerial.org. It is a fork of the original. This version include and use https://github.com/Willena/libsqlite3-wx-see as the native librairy. So the output jar is equivalent to xerial's one. This one includes some functionalities such as encryption and user authentication. Thanks to https://github.com/utelle/wxsqlite3 project that added these improvement, this library can now be updated in order to support these new functionalities.
+This is not the original version from xerial.org. It is a fork of the original. This version include and use https://github.com/Willena/libsqlite3-crypt-auth as the native librairy. So the output jar is equivalent to xerial's one. This one includes some functionalities such as encryption and user authentication. Thanks to https://github.com/utelle/wxsqlite3 project that added these improvement, this library can now be updated in order to support these new functionalities.
 
 SQLite JDBC Driver
 ==================
 
 SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; download the sqlite-jdbc library from the releases tab, then append the library (JAR file) to your class path.
+Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads) our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
@@ -24,10 +24,23 @@ In the original version, in order to use the native version of sqlite-jdbc, user
 
 Another difference is that we are keeping this SQLiteJDBC library up-to-date to the newest version of SQLite engine, because we are one of the hottest users of this library. For example, SQLite JDBC is a core component of[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which is our utility to create personalized genome browsers.
 
-\<\<\<\<\<\<< HEAD
-==================
+Public Discussion Forum
+=======================
 
-1.	Download sqlite-jdbc-(VERSION).jar from the download page then append this jar file into your classpath.
+-	[Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
+-	Post bug reports or feqture requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
+
+-	Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
+-	Latest snapshot (pre-releasse) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+
+Usage
+=====
+
+SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
+
+1.	Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2)\) then append this jar file into your classpath.
 2.	Open a SQLite database connection from your code. (see the example below)
 
 3.	More usage examples are available at [Usage](Usage.md)
@@ -325,12 +338,14 @@ News
 Download
 ========
 
-Download the latest version of SQLiteJDBC from the downloads page.
+Download the latest version of SQLiteJDBC from the [downloads page](https://bitbucket.org/xerial/sqlite-jdbc/downloads).
 
-Build
-=====
+Beta Release
+------------
 
-See [how to build](https://github.com/Willena/sqlite-jdbc/blob/master/README_BUILD.md).
+The early releases (beta) of sqlite-jdbc with some advanced features are available from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
+
+-	The old releases are still available from [here](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
 
 Supported Operating Systems
 ===========================
@@ -376,35 +391,29 @@ It does not require you to:
 -	include the source of this software itself, or of any modifications you may have made to it, in any redistribution you may assemble that includes it;
 -	submit changes that you make to the software back to this software (though such feedback is encouraged).
 
-See License FAQ http://www.apache.org/foundation/licence-FAQ.html for more details
+See License FAQ http://www.apache.org/foundation/licence-FAQ.html for more details.
 
 Using SQLiteJDBC with Maven2
 ============================
 
-If you are familiar with [Maven2](http://maven.apache.org), add the following XML fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
-
-```
-<dependencies>
-    <dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>sqlite-jdbc</artifactId>
-      <version>(version)</version>
-    </dependency>
-</dependencies>
-```
-
-To use snapshot/pre-release versions, add the following repository to your Maven settings:* Pre-release repository: https://oss.sonatype.org/content/repositories/releases* Snapshot repository: https://oss.sonatype.org/content/repositories/snapshots
+If you are familiar with [Maven2](http://maven.apache.org), add the following XML fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).`xml
+    <dependencies>
+        <dependency>
+          <groupId>org.xerial</groupId>
+          <artifactId>sqlite-jdbc</artifactId>
+          <version>(version)</version>
+        </dependency>
+    </dependencies>
+` To use snapshot/pre-release versions, add the following repository to your Maven settings:* Pre-release repository: https://oss.sonatype.org/content/repositories/releases* Snapshot repository: https://oss.sonatype.org/content/repositories/snapshots
 
 ### Hint for maven-shade-plugin
 
-You may need to add shade plugin transformer to solve `No suitable driver found for jdbc:sqlite:` issue.
-
-```xml
+You may need to add shade plugin transformer to solve `No suitable driver found for jdbc:sqlite:` issue.`xml
 <transformer
-	implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-	<resource>META-INF/services/java.sql.Driver</resource>
+    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+    <resource>META-INF/services/java.sql.Driver</resource>
 </transformer>
-```
+`
 
 Using SQLiteJDBC with Tomcat6 Web Server
 ========================================
@@ -417,11 +426,11 @@ Work-around of this problem is to put `sqlite-jdbc-(version).jar` file into `(TO
 
 If you are using Maven for your web application, set the dependency scope as 'provided', and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
 
-```
-<dependency>
-    <groupId>org.xerial</groupId>
-    <artifactId>sqlite-jdbc</artifactId>
-    <version>(version)</version>
-    <scope>provided</scope>
-</dependency>
+```xml
+    <dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>(version)</version>
+        <scope>provided</scope>
+    </dependency>
 ```
