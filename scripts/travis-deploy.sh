@@ -19,9 +19,8 @@ set -evx
 #else
 #  make linux64 && mvn test;
 #fi;
-cd $_BASE_DIR
 
-git checkout travis_config
+cd $_BASE_DIR
 
 echo "The Given type is $TYPE"
 echo "Starting build !"
@@ -31,6 +30,11 @@ make CODEC_TYPE=$TYPE;
 ls /home/travis/build/Willena/sqlite-jdbc-crypt/target/
 . $_BASE_DIR/VERSION
 
-
-git tag -f "$version"
-git push --force --tags --quiet "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
+#If we are on a tag
+if git describe --exact-match --tags HEAD
+then
+  echo "Do not create another tag... we are on it .. "
+else
+  git tag -f "$version"
+  git push --tags --quiet "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
+fi

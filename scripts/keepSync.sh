@@ -7,7 +7,7 @@ _REPO_URL="https://github.com/Willena/sqlite-jdbc-crypt.git"
 source $_SCRIPT_DIR/git-config.sh
 
 git remote add xenial https://github.com/xerial/sqlite-jdbc.git
-git checkout travis_config
+git checkout master
 
 echo "Trying to merge ! "
 git pull xenial master

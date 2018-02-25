@@ -32,6 +32,11 @@ script:
   - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then export PATH=$M2_HOME/bin:$PATH; fi
   - if  [ "$TRAVIS_EVENT_TYPE" == "cron" ] || [ "$TRAVIS_EVENT_TYPE" == "api" ] ; then bash ./scripts/keepSync.sh ; else bash ./scripts/travis-deploy.sh; fi
 
+before_deploy:
+  - echo "Now deploying things !"
+  - git config --local user.name "Villena Guillaume"
+  - git config --local user.email "guiguivil@gmail.com"
+  - source VERSION
 deploy:
   provider: releases
   api_key: $GH_TOKEN
@@ -39,5 +44,6 @@ deploy:
   file_glob: true
   file: /home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-*-SNAPSHOT.jar
   skip_cleanup: true
+  name: SQLite-jdbc-$version
   on:
-    tags: true
+    tag: true
