@@ -51,6 +51,10 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/* $(SQLITE_OUT)/
 	#cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3secure.c $(SQLITE_OUT)/sqlite3secure.c
 	#cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/sqlite3.c $(SQLITE_OUT)/sqlite3.c
+
+	$(CC) -v
+
+
 	$(CC) -o $@ -c $(CCFLAGS) \
 				-DNDEBUG \
 				-DTHREADSAFE=1 \
@@ -91,7 +95,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-ppc64
+native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-ppc64
 
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
