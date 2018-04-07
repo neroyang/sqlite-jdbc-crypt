@@ -9,7 +9,7 @@ import java.sql.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class SQLiteEncryption {
+public class SQLiteEncryptionTest {
 
   String dbName;
   Connection dbCon;
@@ -58,12 +58,6 @@ public class SQLiteEncryption {
     }
   }
 
-  /**
-   * Check if the database file is readable.
-   *
-   * @return Boolean
-   */
-
   @Test
   public void basicRead() throws SQLException {
     connect();
@@ -71,6 +65,7 @@ public class SQLiteEncryption {
     assertEquals(true, isReadable());
     dbCon.close();
   }
+
 
   @Test
   public void cryptDataBase() throws SQLException {

@@ -31,7 +31,7 @@ import org.sqlite.util.OSInfoTest;
     ProgressHandlerTest.class,
     BusyHandlerTest.class,
     // SEE related Tests
-    SQLiteEncryption.class
+    SQLiteEncryptionTest.class,
 
 })
 public class AllTests {

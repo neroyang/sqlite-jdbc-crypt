@@ -36,5 +36,5 @@ then
   echo "Do not create another tag... we are on it .. "
 else
   git tag -f "$version"
-  git push --tags --quiet "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
+  git push -f --tags --quiet "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
 fi
