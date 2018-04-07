@@ -29,8 +29,10 @@ import org.sqlite.util.OSInfoTest;
     UDFTest.class,
     JSON1Test.class,
     ProgressHandlerTest.class,
-    BusyHandlerTest.class
-    
+    BusyHandlerTest.class,
+    // SEE related Tests
+    SQLiteEncryption.class
+
 })
 public class AllTests {
 // runs all Tests
