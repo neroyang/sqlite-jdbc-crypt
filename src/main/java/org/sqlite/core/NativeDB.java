@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import org.sqlite.Function;
 import org.sqlite.ProgressHandler;
+import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
@@ -43,6 +44,12 @@ public final class NativeDB extends DB
             isLoaded = false;
             loadSucceeded = false;
         }
+    }
+
+    public NativeDB(String url, String fileName, SQLiteConfig config)
+            throws SQLException
+    {
+        super(url, fileName, config);
     }
 
     /**
@@ -114,7 +121,7 @@ public final class NativeDB extends DB
     public native synchronized void busy_timeout(int ms);
     
     /**
-     * @see org.sqlite.core.DB#busy_handler(int)
+     * @see org.sqlite.core.DB#busy_handler(BusyHandler)
      */
     @Override
     public native synchronized void busy_handler(BusyHandler busyHandler);
@@ -399,14 +406,14 @@ public final class NativeDB extends DB
     public native synchronized int value_type(Function f, int arg);
 
     /**
-     * @see org.sqlite.core.DB#create_function(java.lang.String, org.sqlite.Function)
+     * @see org.sqlite.core.DB#create_function(java.lang.String, org.sqlite.Function, int)
      */
     @Override
-    public synchronized int create_function(String name, Function func) {
-        return create_function_utf8(stringToUtf8ByteArray(name), func);
+    public synchronized int create_function(String name, Function func, int flags) {
+        return create_function_utf8(stringToUtf8ByteArray(name), func, flags);
     }
 
-    native synchronized int create_function_utf8(byte[] nameUtf8, Function func);
+    native synchronized int create_function_utf8(byte[] nameUtf8, Function func, int flags);
 
     /**
      * @see org.sqlite.core.DB#destroy_function(java.lang.String)

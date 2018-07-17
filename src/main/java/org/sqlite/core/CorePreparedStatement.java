@@ -16,17 +16,22 @@
 
 package org.sqlite.core;
 
+import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteConnectionConfig;
+import org.sqlite.date.FastDateFormat;
+import org.sqlite.jdbc4.JDBC4Statement;
+
 import java.sql.Date;
 import java.sql.SQLException;
-
-import org.sqlite.SQLiteConnection;
-import org.sqlite.jdbc4.JDBC4Statement;
+import java.util.BitSet;
+import java.util.Calendar;
 
 public abstract class CorePreparedStatement extends JDBC4Statement
 {
     protected int columnCount;
     protected int paramCount;
     protected int batchQueryCount;
+    protected BitSet paramValid;
 
     /**
      * Constructs a prepared statement on a provided connection.
@@ -38,10 +43,12 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         super(conn);
 
         this.sql = sql;
+        DB db = conn.getDatabase();
         db.prepare(this);
         rs.colsMeta = db.column_names(pointer);
         columnCount = db.column_count(pointer);
         paramCount = db.bind_parameter_count(pointer);
+        paramValid = new BitSet(paramCount);
         batchQueryCount = 0;
         batch = null;
         batchPos = 0;
@@ -60,7 +67,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
      * @throws SQLException
      */
     protected void checkParameters() throws SQLException {
-        if (batch == null && paramCount > 0)
+        if (paramValid.cardinality() != paramCount)
             throw new SQLException("Values not bound to statement");
     }
 
@@ -76,7 +83,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         checkParameters();
 
         try {
-            return db.executeBatch(pointer, batchQueryCount, batch);
+            return conn.getDatabase().executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
         }
         finally {
             clearBatch();
@@ -89,6 +96,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     @Override
     public void clearBatch() throws SQLException {
         super.clearBatch();
+        paramValid.clear();
         batchQueryCount = 0;
     }
 
@@ -101,7 +109,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
             return -1;
         }
 
-        return db.changes();
+        return conn.getDatabase().changes();
     }
 
     // PARAMETER FUNCTIONS //////////////////////////////////////////
@@ -117,18 +125,21 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         checkOpen();
         if (batch == null) {
             batch = new Object[paramCount];
+            paramValid.clear();
         }
         batch[batchPos + pos - 1] = value;
+        paramValid.set(pos - 1);
     }
 
 
     /**
     * Store the date in the user's preferred format (text, int, or real)
     */
-   protected void setDateByMilliseconds(int pos, Long value) throws SQLException {
-       switch(conn.dateClass) {
+   protected void setDateByMilliseconds(int pos, Long value, Calendar calendar) throws SQLException {
+       SQLiteConnectionConfig config = conn.getConnectionConfig();
+       switch(config.getDateClass()) {
            case TEXT:
-               batch(pos, conn.dateFormat.format(new Date(value)));
+               batch(pos, FastDateFormat.getInstance(config.getDateStringFormat(), calendar.getTimeZone()).format(new Date(value)));
                break;
 
            case REAL:
@@ -137,7 +148,9 @@ public abstract class CorePreparedStatement extends JDBC4Statement
                break;
 
            default: //INTEGER:
-               batch(pos, new Long(value / conn.dateMultiplier));
+               batch(pos, new Long(value / config.getDateMultiplier()));
        }
    }
+
+
 }

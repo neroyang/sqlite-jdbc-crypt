@@ -3,7 +3,7 @@ NOTE
 
 This is not the original version from xerial.org. It is a fork of the original. This version include and use https://github.com/Willena/libsqlite3-wx-see as the native librairy. So the output jar is equivalent to xerial's one. This one includes some functionalities such as encryption and user authentication. Thanks to https://github.com/utelle/wxsqlite3 project that added these improvement, this library can now be updated in order to support these new functionalities.
 
-SQLite JDBC Driver
+SQLite JDBC Driver 
 ==================
 
 SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
@@ -222,6 +222,38 @@ News
 	-	Source code is on branch [feature/jdbc4](https://bitbucket.org/xerial/sqlite-jdbc/branch/feature/jdbc4)
 
 -	2013 August 27th: sqlite-jdbc-3.8.0 snapshot version is [available](https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/3.8.0-SNAPSHOT/)
+*   2018-05-25: sqlite-jdbc-3.23.1
+    * Upgrade to SQLite 3.23.1
+    * Fixes #312, 321, #323, #328
+    * Dropped linux armv6 support temporarily
+*   2017-12-07: sqlite-jdbc-3.21.0.1
+    * Metadata query fixes
+    * Fix for Android
+*   2017-11-14: sqlite-jdbc-3.21.0
+    * Upgrade to SQLite 3.21.0
+    * Various fixes for metadata queries
+*   2017-10-08: sqlite-jdbc-3.20.1
+    * Upgrade to SQLite 3.20.1
+    * Various bug fixes
+*   2017-08-04: sqlite-jdbc-3.20.0
+    * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html)
+    * Support Linux aarch64
+    * Fix #239
+*   2017-06-22: sqlite-jdbc-3.19.3
+    * Upgrade to SQLite [3.19.0](https://www.sqlite.org/releaselog/3_19_3.html)
+*   2017-05-18: sqlite-jdbc-3.18.0
+    * Upgrade to SQLite [3.18.0](http://sqlite.org/releaselog/3_18_0.html)
+*   2017-01-10: sqlite-jdbc-3.16.1
+    * Upgrade to SQLite [3.16.1](https://sqlite.org/releaselog/3_16_1.html)
+    * Add experimental support for ppc64, armv5, v6 (Raspberry PI), v7 and android-arm.
+    * Fix a bug in prepared statements #74
+    * Building all native libraries using cross compilers in docker images
+*   2016-11-04: sqlite-jdbc-3.15.1
+    * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
+*   2016-11-04: sqlite-jdbc-3.15.0
+    * Upgrade to SQLite 3.15.0
+    * Cleanup extracted temp library files upon start
+    * Fix various metadata problems
 
 -	2013 August 19th: [sqlite-jdbc-3.7.15-M1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-M1.jar)
 

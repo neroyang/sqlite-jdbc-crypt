@@ -57,6 +57,23 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 
 
 	$(CC) -o $@ -c $(CCFLAGS) \
+	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
+	    -DSQLITE_HAVE_ISNAN \
+	    -DSQLITE_HAVE_USLEEP \
+	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
+	    -DSQLITE_ENABLE_COLUMN_METADATA \
+	    -DSQLITE_CORE \
+	    -DSQLITE_ENABLE_FTS3 \
+	    -DSQLITE_ENABLE_FTS3_PARENTHESIS \
+	    -DSQLITE_ENABLE_FTS5 \
+	    -DSQLITE_ENABLE_JSON1 \
+	    -DSQLITE_ENABLE_RTREE \
+	    -DSQLITE_ENABLE_STAT2 \
+	    -DSQLITE_THREADSAFE=1 \
+	    -DSQLITE_DEFAULT_MEMSTATUS=0 \
+	    -DSQLITE_DEFAULT_FILE_PERMISSIONS=0666 \
+	    -DSQLITE_MAX_VARIABLE_NUMBER=250000 \
+	    -DSQLITE_MAX_MMAP_SIZE=1099511627776 \
 				-DNDEBUG \
 				-DTHREADSAFE=1 \
 				-DSQLITE_MAX_ATTACHED=10 \
@@ -96,7 +113,8 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-ppc64
+# Disabled linux-armv6 build because of this issue; https://github.com/dockcross/dockcross/issues/190
+native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv7 linux-arm64 linux-android-arm linux-ppc64
 
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
@@ -107,6 +125,9 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
 
 DOCKER_RUN_OPTS=--rm
+
+win32: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-windows-x86 -a $(DOCKER_RUN_OPTS) bash -c "make clean-native native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86 CODEC_TYPE=$(CODEC_TYPE)"
 
 win64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-x64 -a $(DOCKER_RUN_OPTS) bash -c "make clean-native native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64 CODEC_TYPE=$(CODEC_TYPE)"
@@ -131,7 +152,7 @@ linux-armv7: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-armv7 -a $(DOCKER_RUN_OPTS) bash -c "make clean-native native CROSS_PREFIX=arm-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armv7  CODEC_TYPE=$(CODEC_TYPE)"
 
 linux-arm64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-arm64 -a $(DOCKER_RUN_OPTS) bash -c "make clean-native native CROSS_PREFIX=aarch64-linux-gnu- OS_NAME=Linux OS_ARCH=aarch64  CODEC_TYPE=$(CODEC_TYPE)"
+	./docker/dockcross-arm64 -a $(DOCKER_RUN_OPTS) bash -c "make clean-native native CROSS_PREFIX=/usr/bin/aarch64-unknown-linux-gnueabi/bin/aarch64-unknown-linux-gnueabi- OS_NAME=Linux OS_ARCH=aarch64  CODEC_TYPE=$(CODEC_TYPE)"
 
 linux-android-arm: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-android-arm -a $(DOCKER_RUN_OPTS) bash -c "make clean-native native CROSS_PREFIX=/usr/arm-linux-androideabi/bin/arm-linux-androideabi- OS_NAME=Linux OS_ARCH=android-arm  CODEC_TYPE=$(CODEC_TYPE)"
