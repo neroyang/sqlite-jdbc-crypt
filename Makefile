@@ -55,41 +55,31 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 
 	$(CC) -v
 
-
 	$(CC) -o $@ -c $(CCFLAGS) \
-	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
-	    -DSQLITE_HAVE_ISNAN \
-	    -DSQLITE_HAVE_USLEEP \
-	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
-	    -DSQLITE_ENABLE_STAT2 \
-	    -DSQLITE_MAX_VARIABLE_NUMBER=250000 \
-	    -DSQLITE_MAX_MMAP_SIZE=1099511627776 \
-
-	    -DTHREADSAFE=1 \
-	    -DSQLITE_MAX_ATTACHED=10 \
-	    -DSQLITE_SOUNDEX \
-	    -DSQLITE_ENABLE_COLUMN_METADATA \
-	    -DSQLITE_HAS_CODEC=1 \
-	    -DCODEC_TYPE=CODEC_TYPE_CHACHA20 \
-	    -DSQLITE_SECURE_DELETE \
-	    -DSQLITE_ENABLE_FTS3 \
-	    -DSQLITE_ENABLE_FTS3_PARENTHESIS \
-	    -DSQLITE_ENABLE_FTS4 \
-	    -DSQLITE_ENABLE_FTS5 \
-	    -DSQLITE_ENABLE_JSON1 \
-	    -DSQLITE_ENABLE_RTREE \
-	    -DSQLITE_CORE \
-	    -DSQLITE_ENABLE_EXTFUNC \
-	    -DSQLITE_ENABLE_CSV \
-	    -DSQLITE_ENABLE_SHA3 \
-	    -DSQLITE_ENABLE_CARRAY \
-	    -DSQLITE_ENABLE_FILEIO \
-	    -DSQLITE_ENABLE_SERIES \
-	    -DSQLITE_TEMP_STORE=2 \
-	    -DSQLITE_USE_URI \
-	    -DSQLITE_USER_AUTHENTICATION \
-	    -DNDEBUG \
-
+        -DTHREADSAFE=1 \
+        -DSQLITE_MAX_ATTACHED=10 \
+        -DSQLITE_SOUNDEX \
+        -DSQLITE_ENABLE_COLUMN_METADATA \
+        -DSQLITE_HAS_CODEC=1 \
+        -DCODEC_TYPE=CODEC_TYPE_CHACHA20 \
+        -DSQLITE_SECURE_DELETE \
+        -DSQLITE_ENABLE_FTS3 \
+        -DSQLITE_ENABLE_FTS3_PARENTHESIS \
+        -DSQLITE_ENABLE_FTS4 \
+        -DSQLITE_ENABLE_FTS5 \
+        -DSQLITE_ENABLE_JSON1 \
+        -DSQLITE_ENABLE_RTREE \
+        -DSQLITE_CORE \
+        -DSQLITE_ENABLE_EXTFUNC \
+        -DSQLITE_ENABLE_CSV \
+        -DSQLITE_ENABLE_SHA3 \
+        -DSQLITE_ENABLE_CARRAY \
+        -DSQLITE_ENABLE_FILEIO \
+        -DSQLITE_ENABLE_SERIES \
+        -DSQLITE_TEMP_STORE=2 \
+        -DSQLITE_USE_URI \
+        -DSQLITE_USER_AUTHENTICATION \
+        -DNDEBUG \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3secure.c
 
@@ -128,10 +118,10 @@ win64: $(SQLITE_UNPACKED) jni-header
 
 
 linux32: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86"
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/ gillena/sqlite-build-env-i386 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86"
 
 linux64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86_64"
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/ gillena/sqlite-build-env bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86_64"
 
 alpine-linux64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86_64"

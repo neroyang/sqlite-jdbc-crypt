@@ -34,5 +34,7 @@ sed -ire "s|\(<version>\)\(.*\)\(\-SNAPSHOT<\/version>\)|\1$SQLITE_VERSION\3|g" 
 git add $_BASE_DIR/pom.xml
 git add $_BASE_DIR/VERSION
 git commit -m "Prepare for $SQLITE_VERSION"
+git tag --force "$SQLITE_VERSION"
 
 git push --force --quiet "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
+git push --force --quiet --tags "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"

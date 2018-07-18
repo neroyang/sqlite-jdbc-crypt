@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 os: linux
 dist: trusty
 
@@ -38,6 +38,14 @@ before_deploy:
   - git config --local user.email "guiguivil@gmail.com"
   - source VERSION
 
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-5
+    - g++-5
+
 deploy:
   provider: releases
   api_key: $GH_TOKEN
@@ -47,4 +55,4 @@ deploy:
   skip_cleanup: true
   name: SQLite-jdbc-$version
   on:
-    tag: true
+    tags: true
