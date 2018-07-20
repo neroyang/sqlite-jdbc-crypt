@@ -22,10 +22,9 @@ set -evx
 
 cd $_BASE_DIR
 
-echo "The Given type is $TYPE"
 echo "Starting build !"
 
-make CODEC_TYPE=$TYPE;
+make
 
 ls /home/travis/build/Willena/sqlite-jdbc-crypt/target/
 . $_BASE_DIR/VERSION

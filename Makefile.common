@@ -1,5 +1,4 @@
 include VERSION
-include CODEC
 
 ifndef JAVA_HOME
 $(warning Set JAVA_HOME environment variable)

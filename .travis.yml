@@ -9,34 +9,35 @@ language: java
 
 matrix:
   include:
-    - jdk: openjdk7
-      if: type != cron AND type != api
-      env: TYPE=AES128
-    - jdk: oraclejdk8
-      if: type != cron AND type != api
-      env: TYPE=AES128
-    - jdk: openjdk7
-      if: type != cron AND type != api
-      env: TYPE=AES256
-    - jdk: oraclejdk8
-      if: type != cron AND type != api
-      env: TYPE=AES256
-    - jdk: oraclejdk8
-      if: type = cron OR type = api
-
-script:
-  - echo $TRAVIS_EVENT_TYPE
-  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip ; fi
-  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then unzip -qq apache-maven-3.1.1-bin.zip ; fi
-  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then export M2_HOME=$PWD/apache-maven-3.1.1 ; fi
-  - if  [ "$TRAVIS_EVENT_TYPE" != "cron" ] && [ "$TRAVIS_EVENT_TYPE" != "api" ] ; then export PATH=$M2_HOME/bin:$PATH; fi
-  - if  [ "$TRAVIS_EVENT_TYPE" == "cron" ] || [ "$TRAVIS_EVENT_TYPE" == "api" ] ; then bash ./scripts/keepSync.sh ; else bash ./scripts/travis-deploy.sh; fi
+    - stage : Build
+      jdk: openjdk7
+      if: tag IS present
+      script:
+        - wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
+        - unzip -qq apache-maven-3.1.1-bin.zip
+        - export M2_HOME=$PWD/apache-maven-3.1.1
+        - export PATH=$M2_HOME/bin:$PATH
+        - bash ./scripts/travis-deploy.sh
+    -
+      jdk: oraclejdk8
+      if: tag IS present
+      script:
+        - wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
+        - unzip -qq apache-maven-3.1.1-bin.zip
+        - export M2_HOME=$PWD/apache-maven-3.1.1
+        - export PATH=$M2_HOME/bin:$PATH
+        - bash ./scripts/travis-deploy.sh
+    - stage : Update
+      if: tag IS NOT present
+      script:
+        - bash ./scripts/keepSync.sh
 
 before_deploy:
   - echo "Now deploying things !"
   - git config --local user.name "Villena Guillaume"
   - git config --local user.email "guiguivil@gmail.com"
   - source VERSION
+
 deploy:
   provider: releases
   api_key: $GH_TOKEN
