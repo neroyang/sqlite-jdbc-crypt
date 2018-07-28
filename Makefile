@@ -118,10 +118,10 @@ win64: $(SQLITE_UNPACKED) jni-header
 
 
 linux32: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/ gillena/sqlite-build-env-i386 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86"
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work gillena/sqlite-build-env-i386 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86"
 
 linux64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/ gillena/sqlite-build-env bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86_64"
+	docker run $(DOCKER_RUN_OPTS) -ti -v$$PWD:/work gillena/sqlite-build-env bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86_64"
 
 alpine-linux64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c "make clean-native native OS_NAME=Linux OS_ARCH=x86_64"
