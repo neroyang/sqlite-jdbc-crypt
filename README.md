@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Willena/sqlite-jdbc-crypt.svg?branch=master)](https://travis-ci.org/Willena/sqlite-jdbc-crypt)
+
 NOTE
 ====
 
