@@ -60,6 +60,18 @@ static void throwex_errorcode(JNIEnv *env, jobject this, int errorCode)
     (*env)->CallVoidMethod(env, this, mth_throwex, (jint) errorCode);
 }
 
+
+static void throwex_errorcode_msg(JNIEnv *env, int errorCode, const char *str)
+{
+    static jmethodID mth_throwex = 0;
+
+    if (!mth_throwex)
+        mth_throwex = (*env)->GetStaticMethodID(env, dbclass, "throwex", "(ILjava/lang/String;)V");
+
+    (*env)->CallStaticVoidMethod(env, dbclass, mth_throwex, (jint) errorCode, (*env)->NewStringUTF(env, str));
+}
+
+
 static void throwex_msg(JNIEnv *env, const char *str)
 {
     static jmethodID mth_throwexmsg = 0;
@@ -480,7 +492,12 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1open_1utf8(
     freeUtf8Bytes(file_bytes);
 
     if (ret != SQLITE_OK) {
-        throwex_errorcode(env, this, ret);
+        const char *str = (const char*) sqlite3_errmsg(db);
+        if (!str)
+            throwex_errorcode(env, this, ret);
+        else
+            throwex_errorcode_msg(env, ret , str);
+
         sqlite3_close(db);
         return;
     }
