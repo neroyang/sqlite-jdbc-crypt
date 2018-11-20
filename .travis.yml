@@ -13,19 +13,11 @@ matrix:
       jdk: openjdk7
       if: tag IS present
       script:
-        - wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
-        - unzip -qq apache-maven-3.1.1-bin.zip
-        - export M2_HOME=$PWD/apache-maven-3.1.1
-        - export PATH=$M2_HOME/bin:$PATH
         - bash ./scripts/travis-deploy.sh
     -
       jdk: oraclejdk8
       if: tag IS present
       script:
-        - wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
-        - unzip -qq apache-maven-3.1.1-bin.zip
-        - export M2_HOME=$PWD/apache-maven-3.1.1
-        - export PATH=$M2_HOME/bin:$PATH
         - bash ./scripts/travis-deploy.sh
     - stage : Update
       if: tag IS NOT present
