@@ -43,7 +43,7 @@ deploy:
   api_key: $GH_TOKEN
   overwrite: true
   file_glob: true
-  file: /home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-*-SNAPSHOT.jar
+  file: /home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-$version.jar
   skip_cleanup: true
   name: SQLite-jdbc-$version
   on:
