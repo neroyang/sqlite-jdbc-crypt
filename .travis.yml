@@ -23,7 +23,11 @@ matrix:
       if: tag IS NOT present
       script:
         - bash ./scripts/keepSync.sh
-
+        
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y xmlstarlet
+  
 before_deploy:
   - echo "Now deploying things !"
   - git config --local user.name "Villena Guillaume"
