@@ -30,7 +30,8 @@ echo "version=$SQLITE_VERSION" > $_BASE_DIR/VERSION
 cat $_BASE_DIR/VERSION
 
 echo "Changing version in pom.xml"
-sed -ire "s|\(<version>\)\(.*\)\(\-SNAPSHOT<\/version>\)|\1$SQLITE_VERSION\3|g" $_BASE_DIR/pom.xml
+xmlstarlet edit --inplace  -N N="http://maven.apache.org/POM/4.0.0" --update "/N:project/N:version" --value "$SQLITE_VERSION" $_BASE_DIR/pom.xml
+#sed -ire "s|\(<version>\)\(.*\)\(\-SNAPSHOT<\/version>\)|\1$SQLITE_VERSION\3|g" $_BASE_DIR/pom.xml
 git add $_BASE_DIR/pom.xml
 git add $_BASE_DIR/VERSION
 git commit -m "Prepare for $SQLITE_VERSION"
