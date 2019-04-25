@@ -1,72 +1,116 @@
 [![Build Status](https://travis-ci.org/Willena/sqlite-jdbc-crypt.svg?branch=master)](https://travis-ci.org/Willena/sqlite-jdbc-crypt)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.willena/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cz.jirutka.rsql/rsql-parser)
 
-NOTE
-====
+# SQLite JDBC Driver 
 
-This is not the original version from xerial.org. It is a fork of the original. This version include and use https://github.com/Willena/libsqlite3-wx-see as the native librairy. So the output jar is equivalent to xerial's one. This one includes some functionalities such as encryption and user authentication. Thanks to https://github.com/utelle/wxsqlite3 project that added these improvement, this library can now be updated in order to support these new functionalities.
+This is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-SQLite JDBC Driver 
-==================
+This SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file (the native library is provided by [Utelle](http://github.com/utelle) as part of the [WxSQLite3](https://github.com/utelle/wxsqlite3) project.
+The source code for the native SQLite3 library is also available in a mirrored repository ([libsqlite3-wx-see]( https://github.com/Willena/libsqlite3-wx-see))) 
 
-SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
+The usage is quite simple;
+Download the sqlite-jdbc library from [Maven Central](https://search.maven.org/artifact/io.github.willena/sqlite-jdbc/) or from [Github Release](https://github.com/Willena/sqlite-jdbc-crypt/releases/latest), then append the library (JAR file) to your class path or use Maven, Gradle.
 
-Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
-our sqlite-jdbc library, then append the library (JAR file) to your class path.
+## Table of content
 
-See [the sample code](#usage).
+- [SQLite JDBC Driver](#sqlite-jdbc-driver)
+  * [Table of content](#table-of-content)
+  * [Setup](#setup)
+    + [Supported Operating Systems](#supported-operating-systems)
+    + [Manual Download](#manual-download)
+    + [Maven](#maven)
+    + [Gradle](#gradle)
+    + [Configuration](#configuration)
+    + [Build from scratch](#build-from-scratch)
+  * [Usage and examples](#usage-and-examples)
+    + [Basic usage](#basic-usage)
+      - [Simple example](#simple-example)
+      - [Specify database file](#specify-database-file)
+      - [Special database access](#special-database-access)
+        * [Database files in classpaths or network](#database-files-in-classpaths-or-network)
+        * [In-memory databases](#in-memory-databases)
+      - [Using the restore feature](#using-the-restore-feature)
+      - [Using the Blob datatype](#using-the-blob-datatype)
+      - [Connection configuration](#connection-configuration)
+    + [Get started with encryption](#get-started-with-encryption)
+      - [Introduction](#introduction)
+      - [Supported ciphers](#supported-ciphers)
+        * [Introduction](#introduction-1)
+        * [AES 128 Bit CBC - No HMAC (wxSQLite3)](#aes-128-bit-cbc---no-hmac--wxsqlite3-)
+        * [AES 256 Bit CBC - No HMAC (wxSQLite3)](#aes-256-bit-cbc---no-hmac--wxsqlite3-)
+        * [ChaCha20 - Poly1305 HMAC (sqleet)](#chacha20---poly1305-hmac--sqleet-)
+        * [AES 256 Bit CBC - SHA1/SHA256/SHA512 HMAC (SQLCipher)](#aes-256-bit-cbc---sha1-sha256-sha512-hmac--sqlcipher-)
+      - [Configuration methods](#configuration-methods)
+        * [Configure using SQL specific SQL functions](#configure-using-sql-specific-sql-functions)
+        * [Configure using URI (recommended)](#configure-using-uri--recommended-)
+      - [Using an encryption key](#using-an-encryption-key)
+        * [ASCII](#ascii)
+        * [Hex](#hex)
+      - [SQLite3 backup API and encryption](#sqlite3-backup-api-and-encryption)
+      - [Encryption key manipulations](#encryption-key-manipulations)
+        * [Encrypt a plain database](#encrypt-a-plain-database)
+        * [Open an encrypted DB](#open-an-encrypted-db)
+        * [Change the key used for a database](#change-the-key-used-for-a-database)
+        * [Remove the key and go back to plain](#remove-the-key-and-go-back-to-plain)
+  * [Licenses](#licenses)
+    + [Utelle (WxSQLite3)](#utelle--wxsqlite3-)
+    + [Willena](#willena)
+    + [Xerial](#xerial)
 
-What is different from Zentus' SQLite JDBC?
---------------------------------------------
-The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
+## Setup
 
-* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
-* Remove manual configurations
+### Supported Operating Systems
 
-In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
-e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
-This process was error-prone and bothersome to tell every user to set these variables.
-Our SQLiteJDBC library completely does away these inconveniences.
+The native Sqlite library is compiled and *automaticaly* tested for the following platforms and OSs:
 
-Another difference is that we are keeping this SQLiteJDBC library up-to-date to
-the newest version of SQLite engine, because we are one of the hottest users of
-this library. For example, SQLite JDBC is a core component of
-[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
-is our utility to create personalized genome browsers.
+| Operating System / Architecture  	| x86 	| x86_64 	| arm 	| armv6 	| armv7 	| arm64 	| ppc64 	|
+|---------------------------------	|-----	|--------	|-----	|-------	|-------	|-------	|-------	|
+| Windows          	                | ✅   	| ✅      	| ❌   	| ❌     	| ❌     	| ❌     	| ❌     	|
+| Mac Os X                          | ❌   	| ✅      	| ❌   	| ❌     	| ❌     	| ❌     	| ❌     	|
+| Linux Generic                     | ✅   	| ✅      	| ✅   	| ✅     	| ✅     	| ✅     	| ✅     	|
+| Android                           | ✅   	| ✅      	| ✅   	| ✅     	| ✅     	| ✅     	| ✅     	|
 
 
-Public Discussion Forum
-=======================
-*  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
-*  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
+If your os is not listed and you want to use the native library for your OS, build the source from scratch (see the build from scratch section).
 
+### Manual Download
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
+ 1. Download the latest version of SQLiteJDBC from the [Maven Central](https://search.maven.org/artifact/io.github.willena/sqlite-jdbc/) or from [Github Release](https://github.com/Willena/sqlite-jdbc-crypt/releases/latest)
+ 2. Add the downloaded jar to your Java classpath
 
-* Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
-* Latest snapshot (pre-release) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+### Maven
 
-Usage
-============
-SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
+If you are familiar with [Maven](http://maven.apache.org), add the following XML fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
+        
+        <dependency>
+          <groupId>io.github.willena</groupId>
+          <artifactId>sqlite-jdbc</artifactId>
+          <version> version_number </version>
+        </dependency>
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2))
-then append this jar file into your classpath.
-2.  Open a SQLite database connection from your code. (see the example below)
+### Gradle
 
-* More usage examples are available at [Usage](Usage.md)
-* Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)
+If you are familiar with [Gradle](https://gradle.org/), use the following line.
+This will automatically download the SQLiteJDBC library into your project.
+        
+        implementation 'io.github.willena:sqlite-jdbc:version_number'
 
-```
-> javac Sample.java
-> java -classpath ".;sqlite-jdbc-(VERSION).jar" Sample   # in Windows
-or
-> java -classpath ".:sqlite-jdbc-(VERSION).jar" Sample   # in Mac or Linux
-name = leo
-id = 1
-name = yui
-id = 2
-```    
+### Configuration
+
+This library is very limited in global configuration settings.
+You only need to know that it will extracts the native library for your OS to the directory specified by `java.io.tmpdir` JVM property. 
+
+To use another directory, set `org.sqlite.tmpdir` JVM property to your favorite path.
+
+### Build from scratch
+
+        Comming soon !
+## Usage and examples
+### Basic usage
+
+#### Simple example
+
+To open an SQLite database connection from your code, here is an example.
 
 **Sample.java**
 
@@ -123,230 +167,455 @@ id = 2
       }
     }
 ```    
+#### Specify database file
 
 
-How to Specify Database Files
------------------------------
+Here is an example to establishing a connection to a database file `C:\work\mydatabase.db` (in Windows)
 
-Here is an example to select a file `C:\work\mydatabase.db` (in Windows)
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/work/mydatabase.db");
+```
 
-    Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/work/mydatabase.db");
+Opening a UNIX (Linux, Mac OS X, etc.) file `/home/leo/work/mydatabase.db`
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite:/home/leo/work/mydatabase.db");
+```
+#### Special database access
 
+##### Database files in classpaths or network
 
-A UNIX (Linux, Mac OS X, etc) file `/home/leo/work/mydatabase.db`
+To load db files that can be found from the class loader (e.g., db 
+files inside a jar file in the classpath), 
+use `jdbc:sqlite::resource:` prefix. 
 
-    Connection connection = DriverManager.getConnection("jdbc:sqlite:/home/leo/work/mydatabase.db");
+For example, here is an example to access an SQLite DB file, `sample.db` 
+in a Java package `org.yourdomain`: 
 
+```java
+Connection conn = DriverManager.getConnection("jdbc:sqlite::resource:org/yourdomain/sample.db"); 
+```
+In addition, external DB resources can be used as follows: 
 
+```java
+Connection conn = DriverManager.getConnection("jdbc:sqlite::resource:http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/src/test/java/org/sqlite/sample.db"); 
+```
 
-How to Use Memory Databases
----------------------------
-SQLite supports on-memory database management, which does not create any database files.
-To use a memory database in your Java code, get the database connection as follows:
+To access db files inside some specific jar file (in local or remote), 
+use the [JAR URL](http://java.sun.com/j2se/1.5.0/docs/api/java/net/JarURLConnection.html):
 
-    Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+```java
+Connection conn = DriverManager.getConnection("jdbc:sqlite::resource:jar:http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/src/test/resources/testdb.jar!/sample.db"); 
+```
 
+DB files will be extracted to a temporary folder specified in `System.getProperty("java.io.tmpdir")`.
 
-## Configuration
+##### In-memory databases
 
-sqlite-jdbc extracts a native library for your OS to the directory specified by `java.io.tmpdir` JVM property. To use another directory, set `org.sqlite.tmpdir` JVM property to your favorite path.
+SQLite supports on-memory database management, which does not create any database files. To use a memory database in your Java code, get the database connection as follows:
 
-News
-====
-*   2019-03-20: sqlite-jdbc-3.27.2.1
-    * Make smaller the jar size by using -Os compiler option
-    * Performance improvement for concurrent access.
-*   2019-03-18: sqlite-jdbc-3.27.2
-    * Upgrade to SQLite [3.27.2](https://www.sqlite.org/releaselog/3_27_2.html)
-*   2018-10-01: sqlite-jdbc-3.25.2
-    * Upgrade to SQLite [3.25.2](https://www.sqlite.org/releaselog/3_25_2.html)
-    * Fixes #74, #318, #349, #363, #365
-    * Upsert is supported since this version.
-*   2018-05-25: sqlite-jdbc-3.23.1
-    * Upgrade to SQLite [3.23.1](https://www.sqlite.org/releaselog/3_23_1.html)
-    * Fixes #312, #321, #323, #328
-    * Dropped linux armv6 support temporarily
-*   2017-12-07: sqlite-jdbc-3.21.0.1
-    * Metadata query fixes
-    * Fix for Android
-*   2017-11-14: sqlite-jdbc-3.21.0
-    * Upgrade to SQLite [3.21.0](https://www.sqlite.org/releaselog/3_21_0.html)
-    * Various fixes for metadata queries
-*   2017-10-08: sqlite-jdbc-3.20.1
-    * Upgrade to SQLite [3.20.1](https://www.sqlite.org/releaselog/3_20_1.html)
-    * Various bug fixes
-*   2017-08-04: sqlite-jdbc-3.20.0
-    * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html)
-    * Support Linux aarch64
-    * Fix #239
-*   2017-06-22: sqlite-jdbc-3.19.3
-    * Upgrade to SQLite [3.19.3](https://www.sqlite.org/releaselog/3_19_3.html)
-*   2017-05-18: sqlite-jdbc-3.18.0
-    * Upgrade to SQLite [3.18.0](http://sqlite.org/releaselog/3_18_0.html)
-*   2017-01-10: sqlite-jdbc-3.16.1
-    * Upgrade to SQLite [3.16.1](https://sqlite.org/releaselog/3_16_1.html)
-    * Add experimental support for ppc64, armv5, v6 (Raspberry PI), v7 and android-arm.
-    * Fix a bug in prepared statements #74
-    * Building all native libraries using cross compilers in docker images
-*   2016-11-04: sqlite-jdbc-3.15.1
-    * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
-*   2016-11-04: sqlite-jdbc-3.15.0
-    * Upgrade to SQLite [3.15.0](https://sqlite.org/releaselog/3_15_0.html)
-    * Cleanup extracted temp library files upon start
-    * Fix various metadata problems
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+```
 
-*   2016-09-30: sqlite-jdbc-3.14.2.1
-    * Improved the performance for single-threaded applications (#162)
+And also, you can create memory database as follows:
 
-*   2016 09-26: sqlite-jdbc-3.14.2
-    * Updated binaries (Using docker for the ease of cross compiling)
-    * Fixes native libraries for Raspberry-Pi
-    * Dropped support for Mac x86 (The last Mac OS X supporting this architecture was Snow Leopard, 7-year ago!)
-    * Default support of JSON1 extension (#76, #127)
-    * Implement query progress callback (#137)
-    * Use extended error codes (#119)
-*   2015 Oct 3rd: sqlite-jdbc-3.8.11.2
-    * Fix for Raspberry-Pi 2
-    * Add multiple table support for DatabaseMetaData.getColumns
-*   2015 August 3rd: sqlite-jdbc-3.8.11.1
-    * Fix for Linux ARM native library
-*   2015 July 29th: sqlite-jdbc-3.8.11 release.
-    * General performance improvement
-    * warning: No update for FreeBSD binary (need a contribution of native library!)
-*   2015 July 27th: sqlite-jdbc-3.8.10.2 release (Thread-safe date time)
-*   2015 May 11th: sqlite-jdbc-3.8.10.1 release
-*   2015 May 7th: sqlite-jdbc-3.8.9.1 release
-*   2014 October 20th: [sqlite-jdbc-3.8.7](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.7.jar) released.
-    * Fixed the native code loading mechanism to allow loading sqlite-jdbc from multiple class loaders.
-*   2014 October 8th: [sqlite-jdbc-3.8.6](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.6.jar) released.
-*   2014 August 7th: [sqlite-jdbc-3.8.5-pre1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.5-pre1.jar) released.
-*   2014 January 5th: [sqlite-jdbc4-3.8.2-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.2-SNAPSHOT.jar) Introduced JDBC4 version of driver. (Requires at least Java 6).
-    *   Source code is on branch [feature/jdbc4](https://bitbucket.org/xerial/sqlite-jdbc/branch/feature/jdbc4)
-*   2013 August 27th: sqlite-jdbc-3.8.0 snapshot version is [available](https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/3.8.0-SNAPSHOT/)
-*   2013 August 19th: [sqlite-jdbc-3.7.15-M1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-M1.jar)
-*   2013 March 24th : [sqlite-jdbc-3.7.15-SNAPSHOT-2](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT-2.jar)
-*   2013 January 22nd: The repositories and documentations were moved to the bitbucket.
-*   2012 December 15th: [sqlite-jdbc-3.7.15-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT.jar)
-    *   Removed pure-java.
-*   2010 August 27th: [sqlite-jdbc-3.7.2](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/) released
-*   2010 April 3rd: [beta release of sqlite-jdbc-3.6.23.1-SNAPSHOT](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/)
-    *   Added online backup/restore functions. Syntax: `backup to (file name)`, `restore from (file name)`.
-*   2009 December 10th: [sqlite-jdbc-3.6.20.1](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.20.1/) release.
-    *   Read-only connection, recursive trigger, foreign key validation support etc. using SQLiteConfig class.
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite:");
+```
 
-            SQLiteConfig config = new SQLiteConfig();
-            // config.setReadOnly(true);
-            config.setSharedCache(true);
-            config.recursiveTriggers(true);
-            // ... other configuration can be set via SQLiteConfig object
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.toProperties());
+#### Using the restore feature
+
+Take a backup of the whole database to `backup.db` file:
 
 
-*   2009 November 12th: [sqlite-jdbc-3.6.19](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.19/) released.
-    *   added 64-bit OS support: 64-bit native SQLite binaries for Windows (x86\_64), Mac (x86\_64) and Linux (adm64) are available.
-*   2009 August 19th: [sqlite-jdbc-3.6.17.1](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.17.1/) released.
-*   2009 July 2nd: [sqlite-jdbc-3.6.16](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.16/) release.
-*   2009 June 4th: [sqlite-jdbc-3.6.14.2](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.2/) released.
-*   2009 May 19th: [sqlite-jdbc-3.6.14.1](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.1/) released.
-    *   This version supports "jdbc:sqlite::resource:" syntax to access read-only
-    DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the [details](http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76))
+```java
+// Create a memory database
+Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+Statement stmt = conn.createStatement();
+// Do some updates
+stmt.executeUpdate("create table sample(id, name)");
+stmt.executeUpdate("insert into sample values(1, \"leo\")");
+stmt.executeUpdate("insert into sample values(2, \"yui\")");
+// Dump the database contents to a file
+stmt.executeUpdate("backup to backup.db");
+Restore the database from a backup file:
+// Create a memory database
+Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+// Restore the database from a backup file
+Statement stat = conn.createStatement();
+stat.executeUpdate("restore from backup.db");
+```
+
+#### Using the Blob datatype
+
+1. Create a table with a column of blob type: `create table T (id integer, data blob)`
+2. Create a prepared statement with `?` symbol: `insert into T values(1, ?)`
+3. Prepare a blob data in byte array (e.g., `byte[] data = ...`)
+4. `preparedStatement.setBytes(1, data)`
+5. `preparedStatement.execute()...`
+
+#### Connection configuration
+
+Using the SQLiteConfig you can configure a number of things. Here is an example.
+
+```java
+SQLiteConfig config = new SQLiteConfig();
+// config.setReadOnly(true);   
+config.setSharedCache(true);
+config.recursiveTriggers(true);
+// ... other configuration can be set via SQLiteConfig object
+Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.toProperties());
+```
+
+### Get started with encryption
+
+The main goal of this library is to allow users to encrypt databases they are producing.
+In this section we will walk through the main aspect to understand to make this library
+work correctly with your requierements.
+
+The content of this section is maintly extracted from the WxSQLite3 repository.
+
+#### Introduction
+
+This library is compiled with a modified SQLite native library that support multiple
+cipher schemes. In order to be used the user must choose a cipher scheme manually. If
+not using the default one (at the moment the default cipher is CHACHA20) is applied. 
+
+Before applying a configuration, choose the encryption scheme you would like to use in the
+supported cipher list. 
+
+#### Supported ciphers
+
+##### Introduction
+
+The following ciphers are currently supported by wxSQLite3:
+
+| Full Name                                             	| SQL/URI interface name 	|
+|-------------------------------------------------------	|------------------------	|
+| AES 128 Bit CBC - No HMAC (wxSQLite3)                 	| aes128cbc              	|
+| AES 256 Bit CBC - No HMAC (wxSQLite3)                 	| aes256cbc              	|
+| ChaCha20 - Poly1305 HMAC (sqleet)                     	| chacha20               	|
+| AES 256 Bit CBC - SHA1/SHA256/SHA512 HMAC (SQLCipher) 	| sqlcipher              	|
 
 
-*   2009 February 18th: sqlite-jdbc-3.6.11 released.
-    *   Fixed a bug in `PrepStmt`, which does not clear the batch contents after `executeBatch()`.
-    [Discussion](http://groups.google.com/group/xerial/browse_thread/thread/1fa83eb36f6d5dab).
+Definition of abbreviations:
 
+* AES = Advanced Encryption Standard (Rijndael algorithm)
+* CBC = Cipher Block Chaining mode
+* HMAC = Hash Message Authentication Code
+* ChaCha20 = symmetric stream cipher developed by Daniel J. Bernstein
+* Poly1305 = cryptographic message authentication code (MAC) developed by Daniel J. Bernstein
+* SHA1 = Secure Hash Algorithm 1
+* SHA256 = Secure Hash Algorithm 2 (256 bit hash)
+* SHA512 = Secure Hash Algorithm 2 (512 bit hash)
 
-*   2009 January 19th: sqlite-jdbc-3.6.10 released. This version is compatible with
-    sqlite version 3.6.10. <http://www.sqlite.org/releaselog/3_6_10.html>
-    *   Added `READ_UNCOMMITTED` mode support for better query performance: (see also <http://www.sqlite.org/sharedcache.html> )
+Each of these algorithme can be used with default configuration or configured.
+Configuration parameters are given bellow.  
+##### AES 128 Bit CBC - No HMAC (wxSQLite3)
 
-            // READ_UNCOMMITTED mode works only in shared_cache mode.
-             Properties prop = new Properties();
-             prop.setProperty("shared_cache", "true");
-             Connection conn = DriverManager.getConnection("jdbc:sqlite:", prop);
-             conn.setTransactionIsolation(Conn.TRANSACTION_READ_UNCOMMITTED);
+This cipher was added to **wxSQLite3** in 2007 as the first supported encryption scheme. It is a 128 bit AES encryption in CBC mode.
 
+The encryption key is derived from the passphrase according to the algorithm described in the PDF specification (using the MD5 hash function and the RC4 algorithm).
 
-*   2008 December 17th: sqlite-jdbc-3.6.7 released.
-    *   Related information: <http://www.sqlite.org/releaselog/3_6_7.html>
-*   2008 December 1st: sqlite-jdbc-3.6.6.2 released,
-    *   Fixed a bug incorporated in the version 3.6.6 <http://www.sqlite.org/releaselog/3_6_6_2.html>
-*   2008 November 20th: sqlite-jdbc-3.6.6 release.
-    *   Related information sqlite-3.6.6 changes: <http://www.sqlite.org/releaselog/3_6_6.html>
-*   2008 November 11th: sqlite-jdbc-3.6.4.1. A bug fix release
-    *   Pure-java version didn't work correctly. Fixed in both 3.6.4.1 and 3.6.4.
-    If you have already downloaded 3.6.4, please obtain the latest one on the download page.
-*   2008 October 16th: sqlite-jdbc-3.6.4 released.
-    *   Changes from SQLite 3.6.3: <http://www.sqlite.org/releaselog/3_6_4.html>
-    *   `R*-Tree` index and `UPDATE/DELTE` syntax with `LIMIT` clause are available from this build.
-*   2008 October 14th: sqlite-jdbc-3.6.3 released. Compatible with SQLite 3.6.3.
-*   2008 September 18th: sqlite-jdbc-3.6.2 released. Compatible with SQLite 3.6.2
-    and contains pure-java and native versions.
-*   2008 July 17th: sqlite-jdbc-3.6.0 released. Compatible with SQLite 3.6.0, and
-    includes both pure-java and native versions.
-*   2008 July 3rd: [sqlite-jdbc-3.5.9-universal](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.5.9-universal) released.
-    This version contains both native and pure-java SQLite libraries, so it probably works in any OS environment.
+The initial vector for the encryption of each database page is derived from the page number.
 
+The cipher does not use a HMAC, and requires therefore no reserved bytes per database page.
 
-*   2008 May 29th: Current development revision (sqlite-jdbc-3.5.9-1) can be compiled
-    with JDK 6. No need to use JDK 1.5 for compiling SQLiteJDBC.
-*   2008 May 20th: sqlite-jdbc-3.5.9 released.
-*   2008 May 20th: sqlite-jdbc-3.5.8 released (corresponding to SQLite 3.5.8 and
-    sqlite-jdbc-v047). From this release, Windows, Mac OS X, Linux (i386, amd64)
-    and Solaris (SunOS, sparcv9) libraries are bundled into one jar file.
-*   2008 May 1st: sqlite-jdbc is now in the maven central repository!
-    [How to use SQLiteJDBC with Maven2](#using-sqlite-jdbc-with-maven2)
-*   2008 Mar. 18th: sqlite-jdbc-3.5.7 released.
-    *   This version corresponds to [SQLite 3.5.7](http://www.sqlite.org/releaselog/3_5_7.html).
+The following table lists all parameters related to this cipher that can be set before activating database encryption.
 
+| Parameter          	| Default 	| Min 	|  Max  	| Description                                                   	|
+|--------------------	|:-------:	|:---:	|:-----:	|---------------------------------------------------------------	|
+| `legacy`           	|    0    	|  0  	|   1   	| Boolean flag whether the legacy mode should be used           	|
+| `legacy_page_size` 	|    0    	|  0  	| 65536 	| Page size to use in legacy mode, 0 = default SQLite page size 	|
 
-*   2008 Mar. 10th: sqlite-jdbc-v042 released.
-    *   Corresponding to SQLite 3.5.6, which integrates FTS3 (full text search).
-*   2008 Jan. 31st: sqlite-jdbc-v038.4 released.
-    *   SQLiteJDBCLoader.initialize() is no longer required.
-*   2008 Jan. 11th: The Jar files for Windows, Mac OS X and Linux are packed into
-    a single Jar file! So, no longer need to use an OS-specific jar file.
-*   2007 Dec. 31th: Upgraded to sqlitejdbc-v038
+**Note**: It is not recommended to use _legacy_ mode for encrypting new databases. It is supported for compatibility reasons only, so that databases that were encrypted in _legacy_ mode can be accessed.
 
+##### AES 256 Bit CBC - No HMAC (wxSQLite3)
 
-Download
-========
-Download the latest version of SQLiteJDBC from the [downloads page](https://bitbucket.org/xerial/sqlite-jdbc/downloads).
+This cipher was added to **wxSQLite3** in 2010. It is a 256 bit AES encryption in CBC mode.
 
+The encryption key is derived from the passphrase using an SHA256 hash function.
 
-Beta Release
-------------
-The early releases (beta) of sqlite-jdbc with some advanced features are available
-from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
+The initial vector for the encryption of each database page is derived from the page number.
 
-*   The old releases are still available from [here](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
+The cipher does not use a Hash Message Authentication Code (HMAC), and requires therefore no reserved bytes per database page.
 
-Supported Operating Systems
-===========================
-Since sqlite-jdbc-3.6.19, the natively compiled SQLite engines will be used for
-the following operating systems:
+The following table lists all parameters related to this cipher that can be set before activating database encryption.
 
-*   Windows (Windows, x86 architecture, x86_64)
-*   Mac OS X x86_64 (Support for SnowLeopard (i386) has been deprecated)
-*   Linux x86, x86_64, arm (v5, v6, v7 and for android), ppc64
+| Parameter          	| Default 	| Min 	|  Max  	| Description                                                   	|
+|--------------------	|:-------:	|:---:	|:-----:	|---------------------------------------------------------------	|
+| `kdf_iter`         	|   4001  	|  1  	|       	| Number of iterations for the key derivation function          	|
+| `legacy`           	|    0    	|  0  	|   1   	| Boolean flag whether the legacy mode should be used           	|
+| `legacy_page_size` 	|    0    	|  0  	| 65536 	| Page size to use in legacy mode, 0 = default SQLite page size 	|
 
-In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
+**Note**: It is not recommended to use _legacy_ mode for encrypting new databases. It is supported for compatibility reasons only, so that databases that were encrypted in _legacy_ mode can be accessed.
 
-If you want to use the native library for your OS, [build the source from scratch.
+##### ChaCha20 - Poly1305 HMAC (sqleet)
 
+This cipher was introduced for SQLite database encryption by the project [sqleet](https://github.com/resilar/sqleet) in 2017.
 
-How does SQLiteJDBC work?
--------------------------
-Our SQLite JDBC driver package (i.e., `sqlite-jdbc-(VERSION).jar`) contains three
-types of native SQLite libraries (`sqlite-jdbc.dll`, `sqlite-jdbc.jnilib`, `sqlite-jdbc.so`),
-each of them is compiled for Windows, Mac OS and Linux. An appropriate native library
-file is automatically extracted into your OS's temporary folder, when your program
-loads `org.sqlite.JDBC` driver.
+The Internet Engineering Task Force (IETF) officially standardized the cipher algorithm **ChaCha20** and the message authentication code **Poly1305** in [RFC 7905](https://tools.ietf.org/html/rfc7905) for Transport Layer Security (TLS).
 
+The new default **wxSQLite3** cipher is **ChaCha20 - Poly1305**.
 
-License
--------
+The encryption key is derived from the passphrase using a random salt (stored in the first 16 bytes of the database file) and the standardized PBKDF2 algorithm with an SHA256 hash function.
+
+One-time keys per database page are derived from the encryption key, the page number, and a 16 bytes nonce. Additionally, a 16 bytes **Poly1305** authentication tag per database page is calculated. Therefore this cipher requires 32 reserved bytes per database page.
+
+The following table lists all parameters related to this cipher that can be set before activating database encryption.
+
+| Parameter          	| Default 	| sqleet 	| Min 	|  Max  	| Description                                                   	|
+|--------------------	|:-------:	|:------:	|:---:	|:-----:	|---------------------------------------------------------------	|
+| `kdf_iter`         	|  64007  	|  12345 	|  1  	|       	| Number of iterations for the key derivation function          	|
+| `legacy`           	|    0    	|    1   	|  0  	|   1   	| Boolean flag whether the legacy mode should be used           	|
+| `legacy_page_size` 	|   4096  	|  4096  	|  0  	| 65536 	| Page size to use in legacy mode, 0 = default SQLite page size 	|
+
+**Note**: It is not recommended to use _legacy_ mode for encrypting new databases. It is supported for compatibility reasons only, so that databases that were encrypted in _legacy_ mode can be accessed.
+
+##### AES 256 Bit CBC - SHA1/SHA256/SHA512 HMAC (SQLCipher)
+
+SQLCipher was developed by [Zetetic LLC](http://zetetic.net) and initially released in 2008. It is a 256 bit AES encryption in CBC mode.
+
+The encryption key is derived from the passphrase using a random salt (stored in the first 16 bytes of the database file) and the standardized PBKDF2 algorithm with an SHA1, SHA256, or SHA512 hash function.
+
+A random 16 bytes initial vector (nonce) for the encryption of each database page is used for the AES algorithm. Additionally, an authentication tag per database page is calculated. SQLCipher version 1 used no tag; SQLCipher version 2 to 3 used a 20 bytes **SHA1** tag; SQLCipher version 4 uses a 64 bytes **SHA512** tag, allowing to optionally choose a 32 bytes **SHA256** tag instead. Therefore this cipher requires 16, 48 or 80 reserved bytes per database page (since the number of reserved bytes is rounded to the next multiple of the AES block size of 16 bytes).
+
+The following table lists all parameters related to this cipher that can be set before activating database encryption. The columns labelled **v4**, **v3**, **v2**, and **v1** show the parameter values used in legacy SQLCipher versions **3**, **2**, and **1** respectively. To access databases encrypted with the respective SQLCipher version the listed parameters have to be set explicitly.
+
+| Parameter               | Default | v4     | v3    | v2    | v1     | Min   | Max   | Description |
+| :---                    | :---:   | :---:  | :---: | :---: | :---:  | :---: | :---: | :--- |
+| `kdf_iter`              | 256000  | 256000 | 64000 | 4000  | 4000   | 1     |       | Number of iterations for key derivation |
+| `fast_kdf_iter`         | 2       | 2      | 2     | 2     | 2      | 1     |       | Number of iterations for HMAC key derivation |
+| `hmac_use`              | 1       | 1      | 1     | 1     | 0      | 0     | 1     | Flag whether a HMAC should be used |
+| `hmac_pgno`             | 1       | 1      | 1     | 1     | n/a    | 0     | 2     | Storage type for page number in HMAC:<br/>0 = native, 1 = little endian, 2 = big endian|
+| `hmac_salt_mask`        | 0x3a    | 0x3a   | 0x3a  | 0x3a  | n/a    | 0     | 255   | Mask byte for HMAC salt |
+| `legacy`                | 0       | 4      | 3     | 2     | 1      | 0     | 4     | SQLCipher version to be used in legacy mode |
+| `legacy_page_size`      | 4096    | 4096   | 1024  | 1024  | 1024   | 0     | 65536 | Page size to use in legacy mode, 0 = default SQLite page size |
+| `kdf_algorithm`         | 2       | 2      | 0     | 0     | 0      | 0     | 2     | Hash algoritm for key derivation function<br/>0 = SHA1, 1 = SHA256, 2 = SHA512 |
+| `hmac_algorithm`        | 2       | 2      | 0     | 0     | 0      | 0     | 2     | Hash algoritm for HMAC calculation<br/>0 = SHA1, 1 = SHA256, 2 = SHA512 |
+| `plaintext_header_size` | 0       | 0      | n/a   | n/a   | n/a    | 0     | 100   | Size of plaintext database header<br/>must be multiple of 16, i.e. 32 |
+
+**Note**: It is not recommended to use _legacy_ mode for encrypting new databases. It is supported for compatibility reasons only, so that databases that were encrypted in _legacy_ mode can be accessed. However, the default _legacy_ mode for the various SQLCipher versions can be easily set using just the parameter `legacy` set to the requested version number. That is, all other parameters have to be specified only, if their requested value deviates from the default value.
+
+**Note**: Version 4 of SQLCipher introduces a new parameter `plain_text_header_size` to overcome an issue with shared encrypted databases under **iOS**. If this parameter is set to a non-zero value (like 16 or 32), the corresponding number of bytes at the beginning of the database header are not encrypted allowing **iOS** to identify the file as a SQLite database file. The drawback of this approach is that the cipher salt used for the key derivation can't be stored in the database header any longer. Therefore it is necessary to retrieve the cipher salt on creating a new database, and to specify the salt on opening an existing database. The cipher salt can be retrieved with the function `wxsqlite3_codec_data` using parameter `cipher_salt`, and has to be supplied on opening a database via the database URI parameter `cipher_salt`.
+
+#### Configuration methods
+
+##### Configure using SQL specific SQL functions
+
+**wxSQLite3** additionally defines the `wxsqlite3_config()` SQL function which can be used to get or set encryption parameters by using SQL queries.
+
+| SQL function | Description |
+| :--- | :--- |
+| `wxsqlite3_config(paramName TEXT)` | Get value of database encryption parameter `paramName` |
+| `wxsqlite3_config(paramName TEXT, newValue)` | Set value of database encryption parameter `paramName` to `newValue` |
+| `wxsqlite3_config(cipherName TEXT, paramName TEXT)` | Get value of cipher `cipherName` encryption parameter `paramName` |
+| `wxsqlite3_config(cipherName TEXT, paramName TEXT, newValue)` | Set value of cipher `cipherName` encryption parameter `paramName` to `newValue` |
+| `wxsqlite3_codec_data(paramName TEXT)` | Get value of parameter `paramName` |
+| `wxsqlite3_codec_data(paramName TEXT, schemaName TEXT)` | Get value of parameter `paramName` from schema `schemaName` |
+
+**Note:** See the [supported cipher](#encryption_config_cipher) the list of possible `cipherName`s.
+
+**Note:** Calling the configuration functions, the `paramName` can have a prefix as decribed bellow.
+wxsqlite3_config() gets or sets encryption parameters which are relevant for the entire database instance. paramName is the name of the parameter which should be get or set. To set a parameter, pass the new parameter value as newValue. To get the current parameter value, pass -1 as newValue.
+
+Parameter names use the following prefixes:
+
+| Prefix | Description|
+| :--- | :--- |
+| *no prefix* | Get or set the *transient* parameter value. Transient values are only used **once** for the next usage of the `key` . Afterwards, the *permanent* default values will be used again. |
+| `default:` | Get or set the *permanent* default parameter value. Permanent values will be used during the entire lifetime of the `db` database instance, unless explicitly overridden by a transient value. The initial values for the permanent default values are the compile-time default values. |
+| `min:` | Get the lower bound of the valid parameter value range. This is read-only. |
+| `max:` | Get the upper bound of the valid parameter value range. This is read-only. |
+
+The following parameter names are supported for paramName:
+
+| Parameter name | Description | Possible values |
+| :--- | :--- | :--- |
+| `cipher` | The cipher to be used for encrypting the database. | `aes128cbc` <br/>`aes256cbc`<br/>`chacha20`<br/>`sqlcipher` |
+| `hmac_check` | Boolean flag whether the HMAC should be validated on read operations for encryption schemes using HMACs | `0` <br/> `1` |
+
+The return value always is the current parameter value on success, or -1 on failure.
+
+Note: Checking the HMAC on read operations is active by default. With the parameter hmac_check the HMAC check can be disabled in case of trying to recover a corrupted database. It is not recommended to deactivate the HMAC check for regular database operation. Therefore the default can not be changed.
+
+**Examples:**
+
+```SQL
+-- Get cipher used for the next key or rekey operation
+SELECT wxsqlite3_config('cipher');
+```
+
+```SQL
+-- Set cipher used by default for all key and rekey operations
+SELECT wxsqlite3_config('default:cipher', 'sqlcipher');
+```
+
+```SQL
+-- Get number of KDF iterations for the AES-256 cipher
+SELECT wxsqlite3_config('aes256cbc', 'kdf_iter');
+```
+
+```SQL
+-- Set number of KDF iterations for the AES-256 cipher to 54321
+SELECT wxsqlite3_config('aes256cbc', 'kdf_iter', 54321);
+```
+
+```SQL
+-- Activate SQLCipher version 1 encryption scheme for the subsequent key PRAGMA
+SELECT wxsqlite3_config('cipher', 'sqlcipher');
+SELECT wxsqlite3_config('sqlcipher', 'kdf_iter', 4000);
+SELECT wxsqlite3_config('sqlcipher', 'fast_kdf_iter', 2);
+SELECT wxsqlite3_config('sqlcipher', 'hmac_use', 0);
+SELECT wxsqlite3_config('sqlcipher', 'legacy', 1);
+SELECT wxsqlite3_config('sqlcipher', 'legacy_page_size', 1024);
+PRAGMA key='<passphrase>';
+```
+
+```SQL
+-- Get the random key salt as a hexadecimal encoded string (if database is encrypted and uses key salt)
+SELECT wxsqlite3_codec_data('salt');
+```
+
+##### Configure using URI (recommended)
+
+SQLite3 allows to specify database file names as [SQLite Uniform Resource Identifiers](https://www.sqlite.org/uri.html) on opening or attaching databases. The advantage of using a URI file name is that query parameters on the URI can be used to control details of the newly created database connection. The **wxSQLite3** encryption extension now allows to configure the encryption cipher via URI query parameters.
+
+| URI Parameter | Description |
+| :--- | :--- |
+| `cipher`=_cipher name_ | The `cipher` query parameter specifies which cipher should be used. It has to be the identifier name of one of the supported ciphers. |
+| `key`=_passphrase_ | The `key` query parameter allows to specify the passphrase used to initialize the encryption extension for the database connection. If the query string does not contain a `cipher` parameter, the default cipher selected at compile time is used. |
+| `hexkey`=_hex-passphrase_ | The `hexkey` query parameter allows to specify a hexadecimal encoded passphrase used to initialize the encryption extension for the database connection. If the query string does not contain a `cipher` parameter, the default cipher selected at compile time is used. |
+
+**Note 1**: The URI query parameters `key` and `hexkey` are detected and applied by the SQLite3 library itself. If one of them is used and if it is not intended to use the default cipher, then the `cipher` query parameter and optionally further cipher configuration parameters have to be given in the URI query string as well. 
+
+**Note 2**: The URI query parameters `key` and `hexkey` are only respected by SQLite3 on **opening** a database, but not on **attaching** a database. To specify the passphrase on attaching a database the keyword `KEY` of the SQL command `ATTACH` has to be used.
+
+Depending on the cipher selected via the `cipher` parameter, additional query parameters can be used to configure the encryption extension. All parameters as described for each supported cipher (like `legacy`, `kdf_iter`, and so on) can be used to modify the cipher configuration. Default values are used for all cipher parameters which are not explicitly added to the URI query string. Misspelled parameters are silently ignored.
+
+**Note 3**: The `cipher` query parameter is always required, if further query parameters should be used to configure the encryption extension. If this parameter is missing or specifies an unknown cipher, all other cipher configuration parameters are silently ignored, and the default cipher as selected at compile time will be used.
+
+**Note 4**: On **opening** a database all cipher configuration parameters given in the URI query string are used to set the **default** cipher configuration of the database connection. On **attaching** a database the cipher configuration parameters given in the URI query string will be used for the attached database, but will not change the defaults of the database connection.
+
+Example: URI query string to select the legacy SQLCipher Version 2 encryption scheme:  
+```
+file:databasefile?cipher=sqlcipher&legacy=1&kdf_iter=4000
+```
+#### Using an encryption key
+
+##### ASCII
+
+Passing the key to SQLite in order to decrypt the database is quite simple.
+It can be done using either the SQL syntax or the URI syntax. 
+
+Keep in mind that you always need to configure the cipher algorithm before applying the key !
+If your key is an ASCII key you can provide it using 
+
+```sqlite
+PRAGMA key='mykey';
+```
+
+or 
+
+```
+file:databasefile?cipher=sqlcipher&legacy=1&kdf_iter=4000&key=mykey
+```
+
+##### Hex
+
+Passing the hexadecimal version of the key to SQLite in order to decrypt the database is quite simple.
+It is very handy in case of a binary key. It can be done using either the SQL syntax or the URI syntax. 
+
+Keep in mind that you always need to configure the cipher algorithm before applying the key !
+If your key is an Hexadecimal key you can provide it using 
+
+```sqlite
+PRAGMA key="x'myHexKey'";
+```
+
+or 
+
+```
+file:databasefile?cipher=sqlcipher&legacy=1&kdf_iter=4000&hexkey=myHexKey
+```
+
+#### SQLite3 backup API and encryption
+
+When using the SQLite3 backup API to create a backup copy of a SQLite database, the most common case is that source and target database use the same encryption cipher, if any. However, the **wxSQLite3** multi-cipher encryption extension allows to assign different ciphers to the source and target database.
+
+Problems can arise from the fact that different ciphers may require a different number of reserved bytes per database page. If the number of reserved bytes for the target database is greater than that for the source database, performing a backup via the SQLite3 backup API is unfortunately not possible. In such a case the backup will be aborted.
+
+To allow as many cipher combinations as possible the **wxSQLite3** multi-cipher encryption extension implements fallback solutions for the most common case where the source database is not encrypted, but a cipher usually requiring a certain number of reserved bytes per database page was selected for the target database. In this case no reserved bytes will be used by the ciphers. The drawback is that the resulting encryption is less secure and that the resulting databases will not be compatible with the corresponding legacy ciphers.
+
+Please find below a table describing with which encryption cipher combinations the backup API can be used.
+
+| **Backup**&nbsp;&nbsp;**To** |  SQLite3 |  wxSQLite3 |  wxSQLite3 | wxSQLite3 | SQLCipher v1 | SQLCipher v2+ |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+<br/>**From** | Plain<br/>&nbsp; | AES-128<br/>&nbsp; | AES-256<br/>&nbsp; | ChaCha20<br/>Poly1305 | AES-256<br/>&nbsp; | AES-256<br/>SHA1 |
+SQLite3<br/>Plain<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
+wxSQLite3<br/> AES-128<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
+wxSQLite3<br/>AES-256<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
+wxSQLite3<br/>ChaCha20<br/>Poly1305 |  :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: | :x: | :x:
+SQLCipher v1<br/>AES-256<br/>&nbsp; | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :x: | :ok: | :x:
+SQLCipher&nbsp;v2+<br/>AES-256<br/>SHA1 | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :x: | :ok:
+
+Symbol | Description
+:---: | :---
+:ok:  | Works
+:x: | Does **not** work
+:exclamation: | Works only for non-legacy ciphers with reduced security
+<sup>:small_red_triangle_down:</sup> | Keeps reserved bytes per database page
+
+**Note**: It is strongly recommended to use the same encryption cipher for source **and** target database.
+#### Encryption key manipulations
+
+Several manipulation can be very usefull when encrypting a database.
+For example you may want to change the password used, remove it, or encrypt a plain database.
+
+Here is what you need to know. 
+
+##### Encrypt a plain database
+
+1. Open the database file
+2. Set cipher configuration
+3. Apply the key for the first time using the `PRAGMA` syntax
+4. Use as usual
+
+##### Open an encrypted DB
+
+1. Open the database file
+2. set cipher configuration
+3. Apply the corresponding key using the `PRAGMA` syntax
+4. Use normally
+
+##### Change the key used for a database
+
+1. Open the database file
+2. Set cipher configuration
+3. Apply the current key using the `PRAGMA key='mykey'` syntax (It needs to be adapted if using an hexadecimal key)
+4. Change the key using the `PRAGMA rekey='my_new_key'` syntax (It needs to be adapted if using an hexadecimal key)
+5. Use normally
+
+##### Remove the key and go back to plain
+
+1. Open the database file
+2. Set cipher configuration
+3. Apply the current key using the `PRAGMA key='mykey'` syntax (It needs to be adapted if using an hexadecimal key)
+4. Change the key to `null` using`PRAGMA rekey=''`
+5. Use normally
+
+## Licenses
+
+### Utelle (WxSQLite3)
+
+This project includes parts of the WXSQLite3 project witch is licenced under the following licence
+
+wxSQLite3 is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License version 3 or later as published by the Free Software Foundation, with the wxWindows 3.1 exception.
+
+### Willena
+
+This project includes modification done by Guillaume VILLENA (Willena) that are under the following licence.
+
 This program follows the Apache License version 2.0 (<http://www.apache.org/licenses/> ) That means:
 
 It allows you to:
@@ -373,56 +642,33 @@ It does not require you to:
 
 See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more details.
 
+### Xerial
 
+This project is based on xerial work and is frequently synchronized with their [repository](https://github.com/xerial/sqlite-jdbc).
+Here is their Licence.
 
-Using SQLiteJDBC with Maven2
-============================
-If you are familiar with [Maven2](http://maven.apache.org), add the following XML
-fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
+This program follows the Apache License version 2.0 (<http://www.apache.org/licenses/> ) That means:
 
-    <dependencies>
-        <dependency>
-          <groupId>org.xerial</groupId>
-          <artifactId>sqlite-jdbc</artifactId>
-          <version>(version)</version>
-        </dependency>
-    </dependencies>
+It allows you to:
 
-To use snapshot/pre-release versions, add the following repository to your Maven settings:
-* Pre-release repository: <https://oss.sonatype.org/content/repositories/releases>
-* Snapshot repository: <https://oss.sonatype.org/content/repositories/snapshots>
+*   freely download and use this software, in whole or in part, for personal, company internal, or commercial purposes;
+*   use this software in packages or distributions that you create.
 
-### Hint for maven-shade-plugin
+It forbids you to:
 
-You may need to add shade plugin transformer to solve `No suitable driver found for jdbc:sqlite:` issue.
-```xml
-<transformer
-	implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-	<resource>META-INF/services/java.sql.Driver</resource>
-</transformer>
-```
+*   redistribute any piece of our originated software without proper attribution;
+*   use any marks owned by us in any way that might state or imply that we xerial.org endorse your distribution;
+*   use any marks owned by us in any way that might state or imply that you created this software in question.
 
-Using SQLiteJDBC with Tomcat6 Web Server
-========================================
+It requires you to:
 
-(The following note is no longer necessary since sqlite-jdbc-3.8.7)
+*   include a copy of the license in any redistribution you may make that includes this software;
+*   provide clear attribution to us, xerial.org for any distributions that include this software
 
-Do not include sqlite-jdbc-(version).jar in WEB-INF/lib folder of your web application
-package, since multiple web applications hosted by the same Tomcat server cannot
-load the sqlite-jdbc native library more than once. That is the specification of
-JNI (Java Native Interface). You will observe `UnsatisfiedLinkError` exception with
-the message "no SQLite library found".
+It does not require you to:
 
-Work-around of this problem is to put `sqlite-jdbc-(version).jar` file into `(TOMCAT_HOME)/lib`
-directory, in which multiple web applications can share the same native library
-file (.dll, .jnilib, .so) extracted from this sqlite-jdbc jar file.
+*   include the source of this software itself, or of any modifications you may have
+    made to it, in any redistribution you may assemble that includes it;
+*   submit changes that you make to the software back to this software (though such feedback is encouraged).
 
-If you are using Maven for your web application, set the dependency scope as 'provided',
-and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
-
-    <dependency>
-        <groupId>org.xerial</groupId>
-        <artifactId>sqlite-jdbc</artifactId>
-        <version>(version)</version>
-        <scope>provided</scope>
-    </dependency>
+See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more details.
