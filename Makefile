@@ -8,7 +8,7 @@ RESOURCE_DIR = src/main/resources
 all: jni-header package
 
 deploy:
-	mvn package deploy -DperformRelease=true
+	mvn package deploy -DperformRelease=true --settings settings.xml
 
 MVN:=mvn
 SRC:=src/main/java
@@ -42,7 +42,7 @@ $(TARGET)/common-lib/NativeDB.h: $(TARGET)/common-lib/org/sqlite/core/NativeDB.c
 	$(JAVAH) -classpath $(TARGET)/common-lib -jni -o $@ org.sqlite.core.NativeDB
 
 test:
-	mvn test
+	$(MVN) test
 
 clean: clean-target clean-native clean-java clean-tests
 
