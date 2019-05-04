@@ -16,6 +16,7 @@
             <properties>
                 <gpg.executable>gpg</gpg.executable>
                 <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+                <gpg.secretKeyring>${env.GPG_DIR}/signKey.gpg</gpg.secretKeyring>
             </properties>
         </profile>
     </profiles>

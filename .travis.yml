@@ -24,7 +24,6 @@ before_install:
   -in scripts/signKey.gpg.enc -out scripts/signKey.gpg -d
 - sudo apt-get update
 - sudo apt-get install -y xmlstarlet gnupg
-- gpg --import scripts/signKey.gpg
 before_deploy:
 - echo "Now deploying things !"
 - git config --local user.name "Villena Guillaume"
