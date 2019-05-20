@@ -1,3 +1,4 @@
+
 <settings>
     <servers>
         <server>
@@ -14,9 +15,9 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
+		<gpg.keyname>Guillaume Villena</gpg.keyname>
                 <gpg.executable>gpg</gpg.executable>
                 <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
-                <gpg.secretKeyring>${env.GPG_DIR}/signKey.gpg</gpg.secretKeyring>
             </properties>
         </profile>
     </profiles>
