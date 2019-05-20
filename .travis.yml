@@ -19,9 +19,13 @@ matrix:
     if: tag IS NOT present
     script:
     - bash ./scripts/keepSync.sh
+
+install:
+- mkdir -p /tmp/willena/
+- openssl aes-256-cbc -K $encrypted_0e6f4e1fcef0_key -iv $encrypted_0e6f4e1fcef0_iv -in /home/travis/build/Willena/sqlite-jdbc-crypt/scripts/signKey.gpg.enc -out /tmp/willena/signKey.gpg -d
+- gpg --import /tmp/willena/signKey.gpg
+- rm /tmp/willena/signKey.gpg
 before_install:
-- openssl aes-256-cbc -K $encrypted_0e6f4e1fcef0_key -iv $encrypted_0e6f4e1fcef0_iv
-  -in scripts/signKey.gpg.enc -out scripts/signKey.gpg -d
 - sudo apt-get update
 - sudo apt-get install -y xmlstarlet gnupg
 before_deploy:
