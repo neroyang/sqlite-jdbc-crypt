@@ -32,10 +32,10 @@ cat $_BASE_DIR/VERSION
 echo "Changing version in pom.xml"
 xmlstarlet edit --inplace  -N N="http://maven.apache.org/POM/4.0.0" --update "/N:project/N:version" --value "$SQLITE_VERSION" $_BASE_DIR/pom.xml
 #sed -ire "s|\(<version>\)\(.*\)\(\-SNAPSHOT<\/version>\)|\1$SQLITE_VERSION\3|g" $_BASE_DIR/pom.xml
-git add $_BASE_DIR/pom.xml
-git add $_BASE_DIR/VERSION
-git commit -m "Prepare for $SQLITE_VERSION"
-git tag --force "$SQLITE_VERSION"
+echo git add $_BASE_DIR/pom.xml
+echo git add $_BASE_DIR/VERSION
+echo git commit -m "'Prepare for $SQLITE_VERSION'"
+echo git tag "'$SQLITE_VERSION'"
 
-git push --force --quiet "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
-git push --force --quiet --tags "https://${GH_TOKEN}@github.com/Willena/sqlite-jdbc-crypt.git"
+echo git push
+echo git push --tags 
