@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.willena</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.31.0</version>
+  <version>3.31.1</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library with encryption and authentication support</description>
   <url>https://github.com/Willena/sqlite-jdbc-crypt</url>
@@ -152,8 +152,9 @@
             <goals>
               <goal>jar</goal>
             </goals>
-	    <configuration> <!-- Quick and dirty fix to disable error checking with Java8 -->
-                <additionalparam>-Xdoclint:none</additionalparam>
+            <configuration>
+              <!-- Quick and dirty fix to disable error checking with Java8 -->
+              <additionalparam>-Xdoclint:none</additionalparam>
             </configuration>
           </execution>
         </executions>

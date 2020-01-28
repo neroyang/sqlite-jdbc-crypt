@@ -6,19 +6,19 @@ services:
 language: java
 matrix:
   include:
-  - stage: Build
-    jdk: openjdk7
-    if: tag IS present
-    script:
-    - bash ./scripts/travis-deploy.sh
+#  - stage: Build
+#    jdk: openjdk7
+#    if: tag IS present
+#    script:
+#    - bash ./scripts/travis-deploy.sh
   - jdk: oraclejdk8
     if: tag IS present
     script:
     - bash ./scripts/travis-deploy.sh
-  - stage: Update
-    if: tag IS NOT present
-    script:
-    - bash ./scripts/keepSync.sh
+#  - stage: Update
+#    if: tag IS NOT present
+#    script:
+#    - bash ./scripts/keepSync.sh
 
 install:
 - mkdir -p /tmp/willena/
