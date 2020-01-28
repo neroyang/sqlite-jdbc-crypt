@@ -152,6 +152,9 @@
             <goals>
               <goal>jar</goal>
             </goals>
+	    <configuration> <!-- Quick and dirty fix to disable error checking with Java8 -->
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
           </execution>
         </executions>
       </plugin>
