@@ -18,7 +18,7 @@
 #include <string.h>
 #include <assert.h>
 #include "NativeDB.h"
-#include "sqlite3.h"
+#include "sqlite3mc.h"
 
 static jclass dbclass = 0;
 static jclass  fclass = 0;

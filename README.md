@@ -5,8 +5,7 @@
 
 This is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-This SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file (the native library is provided by [Utelle](http://github.com/utelle) as part of the [WxSQLite3](https://github.com/utelle/wxsqlite3) project.
-The source code for the native SQLite3 library is also available in a mirrored repository ([libsqlite3-wx-see]( https://github.com/Willena/libsqlite3-wx-see))) 
+This SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file (the native library is provided by [Utelle](http://github.com/utelle) as part of the [SQLite3MultipleCiphers](https://github.com/utelle/SQLite3MultipleCiphers) project.
 
 The usage is quite simple;
 Download the sqlite-jdbc library from [Maven Central](https://search.maven.org/artifact/io.github.willena/sqlite-jdbc/) or from [Github Release](https://github.com/Willena/sqlite-jdbc-crypt/releases/latest), then append the library (JAR file) to your class path or use Maven, Gradle.
