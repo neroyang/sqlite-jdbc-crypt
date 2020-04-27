@@ -1,18 +1,19 @@
 /**
- *  Copyright 2009 Taro L. Saito
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *--------------------------------------------------------------------------*/
+ * Copyright 2009 Taro L. Saito
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * --------------------------------------------------------------------------
+ */
 //--------------------------------------
 // sqlite-jdbc Project
 //
@@ -23,6 +24,8 @@
 // $Author$
 //--------------------------------------
 package org.sqlite;
+
+import org.sqlite.mc.SQLiteMCConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,8 +45,7 @@ import java.util.TreeSet;
  * @author leo
  *
  */
-public class SQLiteConfig
-{
+public class SQLiteConfig {
     /* Date storage class*/
     public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
@@ -72,8 +74,7 @@ public class SQLiteConfig
         String openMode = pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName);
         if (openMode != null) {
             openModeFlag = Integer.parseInt(openMode);
-        }
-        else {
+        } else {
             // set the default open mode of SQLite3
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
@@ -87,9 +88,8 @@ public class SQLiteConfig
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
     }
 
-    public SQLiteConnectionConfig newConnectionConfig()
-    {
-         return defaultConnectionConfig.copyConfig();
+    public SQLiteConnectionConfig newConnectionConfig() {
+        return defaultConnectionConfig.copyConfig();
     }
 
     /**
@@ -124,24 +124,38 @@ public class SQLiteConfig
 
         Statement stat = conn.createStatement();
         try {
-            if(pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
                 String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
-                if(password != null && !password.isEmpty()) {
+                String cipherName = pragmaTable.getProperty(Pragma.CIPHER.pragmaName);
+
+                if (cipherName != null && password != null && !password.isEmpty() && this instanceof SQLiteMCConfig) {
+                    // Configure before applying the key
+                    // Call the Cipher parameter function
+                    SQLiteMCConfig config = (SQLiteMCConfig) this;
+                    config.applyCipherParameters(conn, stat);
+                }
+
+
+                if (password != null && !password.isEmpty()) {
                     String hexkeyMode = pragmaTable.getProperty(Pragma.HEXKEY_MODE.pragmaName);
-                    String passwordPragma; 
-                    if(HexKeyMode.SSE.name().equalsIgnoreCase(hexkeyMode)) {
+                    String passwordPragma;
+                    if (HexKeyMode.SSE.name().equalsIgnoreCase(hexkeyMode)) {
                         passwordPragma = "pragma hexkey = '%s'";
-                    }else if(HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
+                    } else if (HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
                         passwordPragma = "pragma key = \"x'%s'\"";
                     } else {
-                        passwordPragma = "pragma key = '%s'";
+                        passwordPragma = "pragma key = \"%s\" ";
                     }
                     stat.execute(String.format(passwordPragma, password.replace("'", "''")));
                     stat.execute("select 1 from sqlite_master");
                 }
+
             }
-            
+
             for (Object each : pragmaTable.keySet()) {
+                //TODO : Avoid replaying two times part of the configuration object such as "Key", "cipher", ...
+                // What is the impact of replaying some of the pragmas ?
+
                 String key = each.toString();
                 if (!pragmaParams.contains(key)) {
                     continue;
@@ -152,8 +166,7 @@ public class SQLiteConfig
                     stat.execute(String.format("pragma %s=%s", key, value));
                 }
             }
-        }
-        finally {
+        } finally {
             if (stat != null) {
                 stat.close();
             }
@@ -199,7 +212,7 @@ public class SQLiteConfig
 
     /**
      * Checks if the load extension option is turned on.
-     * @return  True if turned on; false otherwise.
+     * @return True if turned on; false otherwise.
      */
     public boolean isEnabledLoadExtension() {
         return getBoolean(Pragma.LOAD_EXTENSION, "false");
@@ -254,7 +267,7 @@ public class SQLiteConfig
         return result;
     }
 
-    private static final String[] OnOff = new String[] { "true", "false" };
+    private static final String[] OnOff = new String[]{"true", "false"};
 
     final static Set<String> pragmaSet = new TreeSet<String>();
 
@@ -277,7 +290,7 @@ public class SQLiteConfig
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
         DEFAULT_CACHE_SIZE("default_cache_size"),
-	DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
+        DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
         EMPTY_RESULT_CALLBACKS("empty_result_callback", OnOff),
         ENCODING("encoding", toStringArray(Encoding.values())),
         FOREIGN_KEYS("foreign_keys", OnOff),
@@ -293,26 +306,44 @@ public class SQLiteConfig
         READ_UNCOMMITED("read_uncommited", OnOff),
         RECURSIVE_TRIGGERS("recursive_triggers", OnOff),
         REVERSE_UNORDERED_SELECTS("reverse_unordered_selects", OnOff),
-        SECURE_DELETE("secure_delete", new String[] { "true", "false", "fast" }),
+        SECURE_DELETE("secure_delete", new String[]{"true", "false", "fast"}),
         SHORT_COLUMN_NAMES("short_column_names", OnOff),
         SYNCHRONOUS("synchronous", toStringArray(SynchronousMode.values())),
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
         APPLICATION_ID("application_id"),
-        
+
         // Others
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
         BUSY_TIMEOUT("busy_timeout", null),
-        HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
-        PASSWORD("password", null);
 
-        public final String   pragmaName;
+        //Keep compatibility for legacy Xenial JDBC implementation
+        HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
+        PASSWORD("password", null),
+
+        //New pragmas for SQLiteMC improved support
+        KEY("key", null),
+        REKEY("rekey", null),
+        CIPHER("cipher", null),
+        HMAC_CHECK("hmac_check", null),
+        LEGACY("legacy", null),
+        LEGACY_PAGE_SIZE("legacy_page_size", null),
+        KDF_ITER("kdf_iter", null),
+        FAST_KDF_ITER("fast_kdf_iter", null),
+        HMAC_USE("hmac_use", null),
+        HMAC_PGNO("hmac_pgno", null),
+        HMAC_SALT_MASK("hmac_salt_mask", null),
+        KDF_ALGORITHM("kdf_algorithm", null),
+        HMAC_ALGORITHM("hmac_algorithm", null),
+        PLAINTEXT_HEADER_SIZE("plaintext_header_size", null);
+
+        public final String pragmaName;
         public final String[] choices;
-        public final String   description;
+        public final String description;
 
         private Pragma(String pragmaName) {
             this(pragmaName, null);
@@ -328,8 +359,7 @@ public class SQLiteConfig
             this.choices = choices;
         }
 
-        public final String getPragmaName()
-        {
+        public final String getPragmaName() {
             return pragmaName;
         }
     }
@@ -380,8 +410,7 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READONLY);
             resetOpenMode(SQLiteOpenMode.CREATE);
             resetOpenMode(SQLiteOpenMode.READWRITE);
-        }
-        else {
+        } else {
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
             resetOpenMode(SQLiteOpenMode.READONLY);
@@ -456,8 +485,7 @@ public class SQLiteConfig
      * The common interface for retrieving the available pragma parameter values.
      * @author leo
      */
-    private static interface PragmaValue
-    {
+    private static interface PragmaValue {
         public String getValue();
     }
 
@@ -491,7 +519,7 @@ public class SQLiteConfig
         }
 
         private Encoding(Encoding encoding) {
-           this.typeName = encoding.getValue();
+            this.typeName = encoding.getValue();
         }
 
         public String getValue() {
@@ -499,7 +527,7 @@ public class SQLiteConfig
         }
 
         public static Encoding getEncoding(String value) {
-           return valueOf(value.replaceAll("-", "_").toUpperCase());
+            return valueOf(value.replaceAll("-", "_").toUpperCase());
         }
     }
 
@@ -603,6 +631,7 @@ public class SQLiteConfig
 
     public static enum LockingMode implements PragmaValue {
         NORMAL, EXCLUSIVE;
+
         public String getValue() {
             return name();
         }
@@ -770,17 +799,17 @@ public class SQLiteConfig
     public void setUserVersion(int version) {
         set(Pragma.USER_VERSION, version);
     }
-    
-     /**
+
+    /**
      * Set the value of the application-id. The application-id is not used
-     * internally by SQLite. Applications that use SQLite as their application file-format 
-     * should set the Application ID integer to a unique integer so that utilities such as file(1) 
+     * internally by SQLite. Applications that use SQLite as their application file-format
+     * should set the Application ID integer to a unique integer so that utilities such as file(1)
      * can determine the specific file type. The
      * value is stored in the database header at offset 68.
      * @param id A big-endian 32-bit unsigned integer.
      * @see <a href="http://sqlite.org/pragma.html#pragma_application_id">www.sqlite.org/pragma.html#pragma_application_id</a>
      */
-    public void setApplicationId(int id){
+    public void setApplicationId(int id) {
         set(Pragma.APPLICATION_ID, id);
     }
 
@@ -839,10 +868,10 @@ public class SQLiteConfig
             return DatePrecision.valueOf(precision.toUpperCase());
         }
     }
- 
+
     /**
      * @param datePrecision One of SECONDS or MILLISECONDS
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void setDatePrecision(String datePrecision) throws SQLException {
         this.defaultConnectionConfig.setDatePrecision(DatePrecision.getPrecision(datePrecision));

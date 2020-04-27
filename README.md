@@ -104,6 +104,7 @@ To use another directory, set `org.sqlite.tmpdir` JVM property to your favorite 
 ### Build from scratch
 
         Comming soon !
+        
 ## Usage and examples
 ### Basic usage
 
@@ -400,6 +401,46 @@ The following table lists all parameters related to this cipher that can be set 
 
 #### Configuration methods
 
+##### Configure using SQLiteMCConfig objects
+
+Starting with version 3.32.0 the java implementation has a new configuration object called SQLiteMCConfig that can hold 
+the cipher configuration. 
+The interface allows for very simple and quick configuration of the choosen cipher algorithm. 
+
+For each cipher supported a ready to use and a customizable object is present. If you want to go completely custom it
+ is also possible. All parameters are available through setters.
+
+Each conbinaison of paramters presented in previous section are implemented as getDefault (SQLiteMC default) or get<name>Defautls (ex: getV2Defaults() for SQLCipher))
+
+The object names are :
+
+````
+SQLiteMCConfig; //Super class
+
+SQLiteMCConfig.Builder; Use this to build a configuration object from scratch
+    
+SQLiteMCSqlCipherConfig; // Generate a configuration for SQLCipher
+SQLiteMCChacha20Config; // Generate a configuration for Chacha20
+SQLiteMCWxAES256Config; // Generate a configuration for legacy AES 256 WxSQLite3
+SQLiteMCWxAES128Config; // Generate a configuration for legacy AES 128 WxSQLite3
+SQLiteMCRC4Config; // Generate a configuration for System.Data.SQLite
+````
+
+To specify the key you just need to use the `withKey(String Key)` of any of the configuration object.
+To create the connection it is now very simple:
+
+```java
+
+//Using the SQLiteMC default parameters
+Connection connection = DriverManager.getConnection("jdbc:sqlite:file:file.db", new SQLiteMCConfig().withKey("Key").toProperties());
+Connection connection = new SQLiteMCConfig().withKey("Key").createConnection("jdbc:sqlite:file:file.db");
+
+//Using Chacha20
+Connection connection = DriverManager.getConnection("jdbc:sqlite:file:file.db", SQLiteMCChacha20Config.getDefault().withKey("Key").toProperties());
+Connection connection = SQLiteMCChacha20Config.getDefault().withKey("Key").createConnection("jdbc:sqlite:file:file.db");
+
+```
+
 ##### Configure using SQL specific SQL functions
 
 **wxSQLite3** additionally defines the `wxsqlite3_config()` SQL function which can be used to get or set encryption parameters by using SQL queries.
@@ -442,43 +483,43 @@ Note: Checking the HMAC on read operations is active by default. With the parame
 
 ```SQL
 -- Get cipher used for the next key or rekey operation
-SELECT wxsqlite3_config('cipher');
+SELECT sqlite3mc_config('cipher');
 ```
 
 ```SQL
 -- Set cipher used by default for all key and rekey operations
-SELECT wxsqlite3_config('default:cipher', 'sqlcipher');
+SELECT sqlite3mc_config('default:cipher', 'sqlcipher');
 ```
 
 ```SQL
 -- Get number of KDF iterations for the AES-256 cipher
-SELECT wxsqlite3_config('aes256cbc', 'kdf_iter');
+SELECT sqlite3mc_config('aes256cbc', 'kdf_iter');
 ```
 
 ```SQL
 -- Set number of KDF iterations for the AES-256 cipher to 54321
-SELECT wxsqlite3_config('aes256cbc', 'kdf_iter', 54321);
+SELECT sqlite3mc_config('aes256cbc', 'kdf_iter', 54321);
 ```
 
 ```SQL
 -- Activate SQLCipher version 1 encryption scheme for the subsequent key PRAGMA
-SELECT wxsqlite3_config('cipher', 'sqlcipher');
-SELECT wxsqlite3_config('sqlcipher', 'kdf_iter', 4000);
-SELECT wxsqlite3_config('sqlcipher', 'fast_kdf_iter', 2);
-SELECT wxsqlite3_config('sqlcipher', 'hmac_use', 0);
-SELECT wxsqlite3_config('sqlcipher', 'legacy', 1);
-SELECT wxsqlite3_config('sqlcipher', 'legacy_page_size', 1024);
+SELECT sqlite3mc_config('cipher', 'sqlcipher');
+SELECT sqlite3mc_config('sqlcipher', 'kdf_iter', 4000);
+SELECT sqlite3mc_config('sqlcipher', 'fast_kdf_iter', 2);
+SELECT sqlite3mc_config('sqlcipher', 'hmac_use', 0);
+SELECT sqlite3mc_config('sqlcipher', 'legacy', 1);
+SELECT sqlite3mc_config('sqlcipher', 'legacy_page_size', 1024);
 PRAGMA key='<passphrase>';
 ```
 
 ```SQL
 -- Get the random key salt as a hexadecimal encoded string (if database is encrypted and uses key salt)
-SELECT wxsqlite3_codec_data('salt');
+SELECT sqlite3mc_codec_data('salt');
 ```
 
-##### Configure using URI (recommended)
+##### Configure using URI
 
-SQLite3 allows to specify database file names as [SQLite Uniform Resource Identifiers](https://www.sqlite.org/uri.html) on opening or attaching databases. The advantage of using a URI file name is that query parameters on the URI can be used to control details of the newly created database connection. The **wxSQLite3** encryption extension now allows to configure the encryption cipher via URI query parameters.
+SQLite3 allows to specify database file names as [SQLite Uniform Resource Identifiers](https://www.sqlite.org/uri.html) on opening or attaching databases. The advantage of using a URI file name is that query parameters on the URI can be used to control details of the newly created database connection. The **sqlite3mc** encryption extension now allows to configure the encryption cipher via URI query parameters.
 
 | URI Parameter | Description |
 | :--- | :--- |
@@ -540,21 +581,21 @@ file:databasefile?cipher=sqlcipher&legacy=1&kdf_iter=4000&hexkey=myHexKey
 
 #### SQLite3 backup API and encryption
 
-When using the SQLite3 backup API to create a backup copy of a SQLite database, the most common case is that source and target database use the same encryption cipher, if any. However, the **wxSQLite3** multi-cipher encryption extension allows to assign different ciphers to the source and target database.
+When using the SQLite3 backup API to create a backup copy of a SQLite database, the most common case is that source and target database use the same encryption cipher, if any. However, the **sqlite3mc** multi-cipher encryption extension allows to assign different ciphers to the source and target database.
 
 Problems can arise from the fact that different ciphers may require a different number of reserved bytes per database page. If the number of reserved bytes for the target database is greater than that for the source database, performing a backup via the SQLite3 backup API is unfortunately not possible. In such a case the backup will be aborted.
 
-To allow as many cipher combinations as possible the **wxSQLite3** multi-cipher encryption extension implements fallback solutions for the most common case where the source database is not encrypted, but a cipher usually requiring a certain number of reserved bytes per database page was selected for the target database. In this case no reserved bytes will be used by the ciphers. The drawback is that the resulting encryption is less secure and that the resulting databases will not be compatible with the corresponding legacy ciphers.
+To allow as many cipher combinations as possible the **sqlite3mc** multi-cipher encryption extension implements fallback solutions for the most common case where the source database is not encrypted, but a cipher usually requiring a certain number of reserved bytes per database page was selected for the target database. In this case no reserved bytes will be used by the ciphers. The drawback is that the resulting encryption is less secure and that the resulting databases will not be compatible with the corresponding legacy ciphers.
 
 Please find below a table describing with which encryption cipher combinations the backup API can be used.
 
-| **Backup**&nbsp;&nbsp;**To** |  SQLite3 |  wxSQLite3 |  wxSQLite3 | wxSQLite3 | SQLCipher v1 | SQLCipher v2+ |
+| **Backup**&nbsp;&nbsp;**To** |  SQLite3 |  sqlite3mc |  sqlite3mc | sqlite3mc | SQLCipher v1 | SQLCipher v2+ |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: |
 <br/>**From** | Plain<br/>&nbsp; | AES-128<br/>&nbsp; | AES-256<br/>&nbsp; | ChaCha20<br/>Poly1305 | AES-256<br/>&nbsp; | AES-256<br/>SHA1 |
 SQLite3<br/>Plain<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
-wxSQLite3<br/> AES-128<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
-wxSQLite3<br/>AES-256<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
-wxSQLite3<br/>ChaCha20<br/>Poly1305 |  :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: | :x: | :x:
+sqlite3mc<br/> AES-128<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
+sqlite3mc<br/>AES-256<br/>&nbsp; | :ok: | :ok: | :ok: | :ok: :exclamation: | :ok: :exclamation: | :ok: :exclamation:
+sqlite3mc<br/>ChaCha20<br/>Poly1305 |  :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: | :x: | :x:
 SQLCipher v1<br/>AES-256<br/>&nbsp; | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :x: | :ok: | :x:
 SQLCipher&nbsp;v2+<br/>AES-256<br/>SHA1 | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :ok: <sup>:small_red_triangle_down:</sup> | :x: | :ok:
 
@@ -605,11 +646,11 @@ Here is what you need to know.
 
 ## Licenses
 
-### Utelle (WxSQLite3)
+### Utelle (sqlite3mc)
 
-This project includes parts of the WXSQLite3 project witch is licenced under the following licence
+This project includes parts of the sqlite3mc project witch is licenced under the following licence
 
-wxSQLite3 is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License version 3 or later as published by the Free Software Foundation, with the wxWindows 3.1 exception.
+Sqlite3mc is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License version 3 or later as published by the Free Software Foundation, with the wxWindows 3.1 exception.
 
 ### Willena
 

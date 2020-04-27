@@ -30,8 +30,9 @@ import org.sqlite.util.OSInfoTest;
     JSON1Test.class,
     ProgressHandlerTest.class,
     BusyHandlerTest.class,
-    // SEE related Tests
-    SQLiteEncryptionTest.class,
+    // SQLiteMC related Tests
+    SQLiteMCPragmaTest.class,
+    SQLiteMCSQLInterfaceTest.class
 
 })
 public class AllTests {
