@@ -128,6 +128,40 @@ public class SQLiteMCSQLInterfaceTest {
     }
 
     @Test
+    public void chacha20DatabaseHexKeyTest() throws SQLException, IOException {
+        SQLiteMCConfig config = SQLiteMCChacha20Config.getDefault();
+
+        String dbfile = createFile();
+        String Key1 = "raw:54686973206973206D792076657279207365637265742070617373776F72642E";
+
+        cipherDatabaseCreate(config, dbfile, Key1);
+
+        //2. Ensure db is readable with good Password
+        Connection c = cipherDatabaseOpen(config, dbfile, Key1);
+        assertTrue(
+            String.format("1. Be sure the database with config %s can be read with the key '%s'", config.getClass().getSimpleName(), Key1)
+            , databaseIsReadable(c));
+        c.close();
+    }
+
+    @Test
+    public void sqlCipherDatabaseHexKeyTest() throws SQLException, IOException {
+        SQLiteMCConfig config = SQLiteMCSqlCipherConfig.getDefault();
+
+        String dbfile = createFile();
+        String Key1 = "x'54686973206973206D792076657279207365637265742070617373776F72642E'";
+        cipherDatabaseCreate(config, dbfile, Key1);
+
+        //2. Ensure db is readable with good Password
+        Connection c = cipherDatabaseOpen(config, dbfile, Key1);
+        assertTrue(
+            String.format("1. Be sure the database with config %s can be read with the key '%s'", config.getClass().getSimpleName(), Key1)
+            , databaseIsReadable(c));
+        c.close();
+
+    }
+
+    @Test
     public void aes128cbcDatabaseTest() throws IOException, SQLException {
         genericDatabaseTest(SQLiteMCWxAES128Config.getDefault());
     }
