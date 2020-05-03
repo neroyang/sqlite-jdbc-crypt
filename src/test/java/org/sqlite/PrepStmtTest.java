@@ -577,7 +577,7 @@ public class PrepStmtTest
     @Test
     public void clearParameters() throws SQLException {
         stat.executeUpdate("create table tbl (colid integer primary key AUTOINCREMENT, col varchar)");
-        stat.executeUpdate("insert into tbl(col) values (\"foo\")");
+        stat.executeUpdate("insert into tbl(col) values ('foo')");
 
         PreparedStatement prep = conn.prepareStatement("select colid from tbl where col = ?");
 

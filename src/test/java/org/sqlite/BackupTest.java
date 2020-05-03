@@ -35,8 +35,8 @@ public class BackupTest
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, \"leo\")");
-        stmt.executeUpdate("insert into sample values(2, \"yui\")");
+        stmt.executeUpdate("insert into sample values(1, 'leo')");
+        stmt.executeUpdate("insert into sample values(2, 'yui')");
 
         stmt.executeUpdate("backup to " + tmpFile.getAbsolutePath());
         stmt.close();
@@ -66,7 +66,7 @@ public class BackupTest
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");
         for (int i = 0; i < 10000; i++)
-            stmt.executeUpdate("insert into sample(name) values(\"leo\")");
+            stmt.executeUpdate("insert into sample(name) values('leo')");
 
         File tmpFile = File.createTempFile("backup-test2", ".sqlite");
         tmpFile.deleteOnExit();

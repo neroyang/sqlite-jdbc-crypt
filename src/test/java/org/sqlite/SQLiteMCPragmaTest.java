@@ -25,9 +25,11 @@ public class SQLiteMCPragmaTest {
 
 
     public boolean databaseIsReadable(Connection connection) {
+        if (connection == null)
+            return false;
         try {
             Statement st = connection.createStatement();
-            ResultSet resultSet = st.executeQuery("SELECT 1 FROM sqlite_master");
+            ResultSet resultSet = st.executeQuery("SELECT count(*) as nb FROM sqlite_master");
             resultSet.next();
             //System.out.println("The out is : " + resultSet.getString("nb"));
             assertEquals("When reading the database, the result should contain the number 1", "1", resultSet.getString("nb"));
@@ -44,19 +46,19 @@ public class SQLiteMCPragmaTest {
     }
 
     public void plainDatabaseCreate(String dbPath) throws IOException, SQLException {
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:file:" + dbPath);
         applySchema(conn);
         conn.close();
     }
 
     public void cipherDatabaseCreate(SQLiteMCConfig config, String dbPath, String key) throws SQLException {
-        Connection connection = config.withKey(key).createConnection("jdbc:sqlite:" + dbPath);
+        Connection connection = config.withKey(key).createConnection("jdbc:sqlite:file:" + dbPath);
         applySchema(connection);
         connection.close();
     }
 
     public Connection plainDatabaseOpen(String dbPath) throws SQLException {
-        return DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+        return DriverManager.getConnection("jdbc:sqlite:file:" + dbPath);
     }
 
     @Test
@@ -74,8 +76,13 @@ public class SQLiteMCPragmaTest {
 
 
     public Connection cipherDatabaseOpen(SQLiteMCConfig config, String dbPath, String key) throws SQLException {
-        Connection conn = config.withKey(key).createConnection("jdbc:sqlite:" + dbPath);
-        return conn;
+        try {
+            Connection conn = config.withKey(key).createConnection("jdbc:sqlite:file:" + dbPath);
+            return conn;
+        } catch (SQLiteException e) {
+            return null;
+        }
+
     }
 
     public void genericDatabaseTest(SQLiteMCConfig config) throws IOException, SQLException {
@@ -95,16 +102,15 @@ public class SQLiteMCPragmaTest {
 
         //3. Ensure db is not readable without the good password (Using Key2 as password)
         c = cipherDatabaseOpen(config, path, Key2);
-        assertFalse(
+        assertNull(
             String.format("2 Be sure the database with config %s cannot be read with the key '%s' (good key is %s)", config.getClass().getSimpleName(), Key2, Key1),
-            databaseIsReadable(c));
-        c.close();
+            c);
 
         //4. Rekey the database
         c = cipherDatabaseOpen(config, path, Key1);
         assertTrue(String.format("3. Be sure the database with config %s can be read before rekeying with the key '%s' (replacing %s with %s)", config.getClass().getSimpleName(), Key2, Key1, Key2)
             , databaseIsReadable(c));
-        c.createStatement().execute(String.format("PRAGMA rekey = '%s'", Key2));
+        c.createStatement().execute(String.format("PRAGMA rekey=%s", Key2));
         assertTrue("4. Be sure the database is still readable after rekeying"
             , databaseIsReadable(c));
         c.close();
@@ -112,7 +118,7 @@ public class SQLiteMCPragmaTest {
         //5. Should now be readable with Key2
         c = cipherDatabaseOpen(config, path, Key2);
         assertTrue(String.format("5. Should now be able to open the database with config %s and the new key '%s'", config.getClass().getSimpleName(), Key2)
-            ,databaseIsReadable(c));
+            , databaseIsReadable(c));
         c.close();
     }
 
@@ -158,24 +164,24 @@ public class SQLiteMCPragmaTest {
         c.close();
 
         c = cipherDatabaseOpen(SQLiteMCRC4Config.getDefault(), dbfile, key);
-        assertFalse("Should not be readable with RC4", databaseIsReadable(c));
-        c.close();
+        assertNull("Should not be readable with RC4", c);
+//        c.close();
 
         c = cipherDatabaseOpen(SQLiteMCSqlCipherConfig.getDefault(), dbfile, key);
-        assertFalse("Should not be readable with SQLCipher",databaseIsReadable(c));
-        c.close();
+        assertNull("Should not be readable with SQLCipher",c);
+//        c.close();
 
         c = cipherDatabaseOpen(SQLiteMCWxAES128Config.getDefault(), dbfile, key);
-        assertFalse("Should not be readable with Wx128bit", databaseIsReadable(c));
-        c.close();
+        assertNull("Should not be readable with Wx128bit", c);
+//        c.close();
 
         c = cipherDatabaseOpen(SQLiteMCWxAES256Config.getDefault(), dbfile, key);
-        assertFalse("Should not be readable with Wx256", databaseIsReadable(c));
-        c.close();
+        assertNull("Should not be readable with Wx256", c);
+//        c.close();
 
         c = cipherDatabaseOpen(SQLiteMCChacha20Config.getDefault(), dbfile, key);
         assertTrue("Should be readable with Chacha20 as it is default", databaseIsReadable(c));
-        c.close();
+//        c.close();
     }
 
 

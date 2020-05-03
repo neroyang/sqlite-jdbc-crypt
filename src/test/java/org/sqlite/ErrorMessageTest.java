@@ -76,14 +76,14 @@ public class ErrorMessageTest {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:" + from.getAbsolutePath());
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, \"foo\")");
+        stmt.executeUpdate("insert into sample values(1, 'foo')");
 
         File to = File.createTempFile("error-message-test-moved-from", ".sqlite");
         assumeTrue(to.delete());
         assumeTrue(from.renameTo(to));
 
         thrown.expectMessage(JUnitMatchers.containsString("[SQLITE_READONLY_DBMOVED]"));
-        stmt.executeUpdate("insert into sample values(2, \"bar\")");
+        stmt.executeUpdate("insert into sample values(2, 'bar')");
 
         stmt.close();
         conn.close();
@@ -97,7 +97,7 @@ public class ErrorMessageTest {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, \"foo\")");
+        stmt.executeUpdate("insert into sample values(1, 'foo')");
         stmt.close();
         conn.close();
 
@@ -106,7 +106,7 @@ public class ErrorMessageTest {
         conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
         stmt = conn.createStatement();
         thrown.expectMessage(JUnitMatchers.containsString("[SQLITE_READONLY]"));
-        stmt.executeUpdate("insert into sample values(2, \"bar\")");
+        stmt.executeUpdate("insert into sample values(2, 'bar')");
         stmt.close();
         conn.close();
     }
@@ -133,7 +133,7 @@ public class ErrorMessageTest {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:" + from.getAbsolutePath());
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, \"foo\")");
+        stmt.executeUpdate("insert into sample values(1, 'foo')");
 
         File to = File.createTempFile("error-message-test-plain-2", ".sqlite");
         assumeTrue(to.delete());
@@ -142,7 +142,7 @@ public class ErrorMessageTest {
         thrown.expectMessage(JUnitMatchers.containsString("[SQLITE_READONLY_DBMOVED]"));
         thrown.expect(new VendorCodeMatcher(SQLiteErrorCode.SQLITE_READONLY));
         thrown.expect(new ResultCodeMatcher(SQLiteErrorCode.SQLITE_READONLY_DBMOVED));
-        stmt.executeUpdate("insert into sample values(2, \"bar\")");
+        stmt.executeUpdate("insert into sample values(2, 'bar')");
 
         stmt.close();
         conn.close();

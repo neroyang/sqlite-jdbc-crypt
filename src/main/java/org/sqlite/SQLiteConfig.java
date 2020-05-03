@@ -122,16 +122,34 @@ public class SQLiteConfig {
         pragmaParams.remove(Pragma.PASSWORD.pragmaName);
         pragmaParams.remove(Pragma.HEXKEY_MODE.pragmaName);
 
+        //Remove SQLiteMC related PRAGMAS, so that we are not applying twice the configuration
+        //TODO : Clone the pragmaTable and remove each Pragma when used so that no checking is required ?
+        // will make a lighter code ?
+        pragmaParams.remove(Pragma.KEY.pragmaName);
+        pragmaParams.remove(Pragma.REKEY.pragmaName);
+        pragmaParams.remove(Pragma.CIPHER.pragmaName);
+        pragmaParams.remove(Pragma.HMAC_CHECK.pragmaName);
+        pragmaParams.remove(Pragma.LEGACY.pragmaName);
+        pragmaParams.remove(Pragma.LEGACY_PAGE_SIZE.pragmaName);
+        pragmaParams.remove(Pragma.KDF_ITER.pragmaName);
+        pragmaParams.remove(Pragma.FAST_KDF_ITER.pragmaName);
+        pragmaParams.remove(Pragma.HMAC_USE.pragmaName);
+        pragmaParams.remove(Pragma.HMAC_PGNO.pragmaName);
+        pragmaParams.remove(Pragma.HMAC_SALT_MASK.pragmaName);
+        pragmaParams.remove(Pragma.KDF_ALGORITHM.pragmaName);
+        pragmaParams.remove(Pragma.HMAC_ALGORITHM.pragmaName);
+        pragmaParams.remove(Pragma.PLAINTEXT_HEADER_SIZE.pragmaName);
+
         Statement stat = conn.createStatement();
         try {
             if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
                 String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
                 String cipherName = pragmaTable.getProperty(Pragma.CIPHER.pragmaName);
 
-                if (cipherName != null && password != null && !password.isEmpty() && this instanceof SQLiteMCConfig) {
+                if (cipherName != null && password != null && !password.isEmpty() ) {
                     // Configure before applying the key
                     // Call the Cipher parameter function
-                    SQLiteMCConfig config = (SQLiteMCConfig) this;
+                    SQLiteMCConfig config = new SQLiteMCConfig(toProperties());
                     config.applyCipherParameters(conn, stat);
                 }
 
@@ -144,7 +162,7 @@ public class SQLiteConfig {
                     } else if (HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
                         passwordPragma = "pragma key = \"x'%s'\"";
                     } else {
-                        passwordPragma = "pragma key = \"%s\" ";
+                        passwordPragma = "pragma key = '%s'";
                     }
                     stat.execute(String.format(passwordPragma, password.replace("'", "''")));
                     stat.execute("select 1 from sqlite_master");
@@ -153,8 +171,6 @@ public class SQLiteConfig {
             }
 
             for (Object each : pragmaTable.keySet()) {
-                //TODO : Avoid replaying two times part of the configuration object such as "Key", "cipher", ...
-                // What is the impact of replaying some of the pragmas ?
 
                 String key = each.toString();
                 if (!pragmaParams.contains(key)) {

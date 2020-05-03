@@ -103,7 +103,7 @@ public class StatementTest
 
     @Test
     public void stringRS() throws SQLException {
-        ResultSet rs = stat.executeQuery("select \"Russell\";");
+        ResultSet rs = stat.executeQuery("select 'Russell';");
         assertTrue(rs.next());
         assertEquals(rs.getString(1), "Russell");
         assertFalse(rs.next());

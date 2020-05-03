@@ -11,6 +11,21 @@ import java.util.Properties;
 
 public class SQLiteMCConfig extends SQLiteConfig {
 
+    private static final Pragma[] CIPHER_PRAGMA_ORDER = new Pragma[]{
+        Pragma.CIPHER,
+        Pragma.HMAC_CHECK,
+        Pragma.LEGACY,
+        Pragma.LEGACY_PAGE_SIZE,
+        Pragma.KDF_ITER,
+        Pragma.FAST_KDF_ITER,
+        Pragma.HMAC_USE,
+        Pragma.HMAC_PGNO,
+        Pragma.HMAC_SALT_MASK,
+        Pragma.KDF_ALGORITHM,
+        Pragma.HMAC_ALGORITHM,
+        Pragma.PLAINTEXT_HEADER_SIZE,
+    };
+
     public SQLiteMCConfig() {
         super();
     }
@@ -50,7 +65,7 @@ public class SQLiteMCConfig extends SQLiteConfig {
     }
 
     protected SQLiteMCConfig setLegacyPageSize(int value) {
-        setPragma(SQLiteConfig.Pragma.LEGACY, String.valueOf(value));
+        setPragma(Pragma.LEGACY_PAGE_SIZE, String.valueOf(value));
         return this;
     }
 
@@ -100,20 +115,7 @@ public class SQLiteMCConfig extends SQLiteConfig {
     }
 
     public void applyCipherParameters(Connection conn, Statement stat) throws SQLException {
-        applyCipherParametersByNames(new Pragma[]{
-            Pragma.CIPHER,
-            Pragma.HMAC_CHECK,
-            Pragma.LEGACY,
-            Pragma.LEGACY_PAGE_SIZE,
-            Pragma.KDF_ITER,
-            Pragma.FAST_KDF_ITER,
-            Pragma.HMAC_USE,
-            Pragma.HMAC_PGNO,
-            Pragma.HMAC_SALT_MASK,
-            Pragma.KDF_ALGORITHM,
-            Pragma.HMAC_ALGORITHM,
-            Pragma.PLAINTEXT_HEADER_SIZE
-        }, conn, stat, useSQLInterface);
+        applyCipherParametersByNames(CIPHER_PRAGMA_ORDER, conn, stat, useSQLInterface);
     }
 
     protected void applyCipherParametersByNames(Pragma[] pragmas, Connection conn, Statement statement, boolean useSQLInterface) throws SQLException {
@@ -135,13 +137,12 @@ public class SQLiteMCConfig extends SQLiteConfig {
                         preparedStatement.setString(1, pragma.name());
                         preparedStatement.setString(2, cipherProperty);
                         preparedStatement.execute();
-                    }
-                    else {
-                      PreparedStatement preparedStatement = conn.prepareStatement("SELECT sqlite3mc_config(?, ?, ?);");
-                      preparedStatement.setString(1, cipherProperty);
-                      preparedStatement.setString(2, pragma.name().toLowerCase());
-                      preparedStatement.setString(3, property);
-                      preparedStatement.execute();
+                    } else {
+                        PreparedStatement preparedStatement = conn.prepareStatement("SELECT sqlite3mc_config(?, ?, ?);");
+                        preparedStatement.setString(1, cipherProperty);
+                        preparedStatement.setString(2, pragma.name().toLowerCase());
+                        preparedStatement.setString(3, property);
+                        preparedStatement.execute();
                     }
                 }
             }
@@ -185,65 +186,65 @@ public class SQLiteMCConfig extends SQLiteConfig {
     }
 
 
-    public static class Builder extends SQLiteMCConfig{
-      @Override
-      public Builder setPlaintextHeaderSize(int value) {
-        return (Builder) super.setPlaintextHeaderSize(value);
-      }
+    public static class Builder extends SQLiteMCConfig {
+        @Override
+        public Builder setPlaintextHeaderSize(int value) {
+            return (Builder) super.setPlaintextHeaderSize(value);
+        }
 
-      @Override
-      public Builder setLegacy(int value) {
-        return (Builder) super.setLegacy(value);
-      }
+        @Override
+        public Builder setLegacy(int value) {
+            return (Builder) super.setLegacy(value);
+        }
 
-      @Override
-      public Builder setKdfIter(int value) {
-        return (Builder) super.setKdfIter(value);
-      }
+        @Override
+        public Builder setKdfIter(int value) {
+            return (Builder) super.setKdfIter(value);
+        }
 
-      @Override
-      public Builder setKdfAlgorithm(KdfAlgorithm value) {
-        return (Builder) super.setKdfAlgorithm(value);
-      }
+        @Override
+        public Builder setKdfAlgorithm(KdfAlgorithm value) {
+            return (Builder) super.setKdfAlgorithm(value);
+        }
 
-      @Override
-      public Builder setHmacUse(boolean value) {
-        return (Builder) super.setHmacUse(value);
-      }
+        @Override
+        public Builder setHmacUse(boolean value) {
+            return (Builder) super.setHmacUse(value);
+        }
 
-      @Override
-      public Builder setHmacSaltMask(int value) {
-        return (Builder) super.setHmacSaltMask(value);
-      }
+        @Override
+        public Builder setHmacSaltMask(int value) {
+            return (Builder) super.setHmacSaltMask(value);
+        }
 
-      @Override
-      public Builder setHmacPgno(HmacPgno value) {
-        return (Builder) super.setHmacPgno(value);
-      }
+        @Override
+        public Builder setHmacPgno(HmacPgno value) {
+            return (Builder) super.setHmacPgno(value);
+        }
 
-      @Override
-      public Builder setHmacAlgorithm(HmacAlgorithm value) {
-        return (Builder) super.setHmacAlgorithm(value);
-      }
+        @Override
+        public Builder setHmacAlgorithm(HmacAlgorithm value) {
+            return (Builder) super.setHmacAlgorithm(value);
+        }
 
-      @Override
-      public Builder setFastKdfIter(int value) {
-        return (Builder) super.setFastKdfIter(value);
-      }
+        @Override
+        public Builder setFastKdfIter(int value) {
+            return (Builder) super.setFastKdfIter(value);
+        }
 
-      @Override
-      public Builder setLegacyPageSize(int value) {
-        return (Builder) super.setLegacyPageSize(value);
-      }
+        @Override
+        public Builder setLegacyPageSize(int value) {
+            return (Builder) super.setLegacyPageSize(value);
+        }
 
-      @Override
-      public Builder setCipher(CipherAlgorithm cipherAlgorithm) {
-        return (Builder) super.setCipher(cipherAlgorithm);
-      }
+        @Override
+        public Builder setCipher(CipherAlgorithm cipherAlgorithm) {
+            return (Builder) super.setCipher(cipherAlgorithm);
+        }
 
-      public SQLiteMCConfig toSQLiteMCConfig(){
-        return this;
-      }
+        public SQLiteMCConfig toSQLiteMCConfig() {
+            return this;
+        }
     }
 
 }

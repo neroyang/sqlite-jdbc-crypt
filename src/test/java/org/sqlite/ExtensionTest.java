@@ -81,7 +81,7 @@ public class ExtensionTest {
         }
 
         {
-            ResultSet rs = stat.executeQuery("select reverse(\"ACGT\")");
+            ResultSet rs = stat.executeQuery("select reverse('ACGT')");
             assertTrue(rs.next());
             assertEquals("TGCA", rs.getString(1));
             rs.close();
