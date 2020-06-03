@@ -104,7 +104,6 @@
           <goals>deploy</goals>
           <pushChanges>false</pushChanges>
           <localCheckout>true</localCheckout>
-          <connectionUrl>https://oss.sonatype.org/service/local/staging/deploy/maven2</connectionUrl>
         </configuration>
       </plugin>
       <plugin>
