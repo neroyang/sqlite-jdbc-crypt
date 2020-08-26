@@ -17,7 +17,7 @@ SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
 SQLITE_SOURCE?=$(TARGET)/$(SQLITE_AMAL_PREFIX)
-SQLITE_HEADER?=$(SQLITE_SOURCE)/sqlite3mc.h
+SQLITE_HEADER?=$(SQLITE_SOURCE)/sqlite3mc_amalgamation.h
 ifneq ($(SQLITE_SOURCE),$(TARGET)/$(SQLITE_AMAL_PREFIX))
 	created := $(shell touch $(SQLITE_UNPACKED))
 endif
@@ -27,10 +27,14 @@ SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
-	if [ ! -d "$(TARGET)/$(version)" ] ; then git clone https://github.com/utelle/SQLite3MultipleCiphers.git $(TARGET)/$(version); cd $(TARGET)/$(version); fi
+	echo "Downloading Archive"
+	curl -s https://api.github.com/repos/utelle/SQLite3MultipleCiphers/releases/latest | jq -r ".assets[] | select(.name | contains(\"amalgamation\")) | .browser_download_url" | wget -O $@ -i -
+	#if [ ! -d "$(TARGET)/$(version)" ] ; then git clone https://github.com/utelle/SQLite3MultipleCiphers.git $(TARGET)/$(version); cd $(TARGET)/$(version); fi
 	@mkdir -p $(@D)
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
+	unzip -qo $< -d $(TARGET)/$(version)
+	(mv $(TARGET)/tmp.$(version)/$(SQLITE_AMAL_PREFIX) $(TARGET) && rmdir $(TARGET)/tmp.$(version)) || mv $(TARGET)/tmp.$(version)/ $(TARGET)/$(SQLITE_AMAL_PREFIX)
 	if [ -d "$(TARGET)/$(version)/src" ] ; then mv $(TARGET)/$(version)/src $(TARGET)/$(SQLITE_AMAL_PREFIX);fi
 	touch $@
 
@@ -51,12 +55,12 @@ test:
 
 clean: clean-target clean-native clean-java clean-tests
 
-
 $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	@mkdir -p $(@D)
 	cp $(TARGET)/$(SQLITE_AMAL_PREFIX)/* $(SQLITE_OUT)/
+
 # insert a code for loading extension functions
-	# perl -p -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" $(SQLITE_SOURCE)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c.tmp
+# perl -p -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" $(SQLITE_SOURCE)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c.tmp
 # register compile option 'JDBC_EXTENSIONS'
 #	perl -p -e "s/#if SQLITE_LIKE_DOESNT_MATCH_BLOBS/  \"JDBC_EXTENSIONS\",\n#if SQLITE_LIKE_DOESNT_MATCH_BLOBS/;" $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
 # 	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
@@ -101,9 +105,9 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
         -DSQLITE_MAX_VARIABLE_NUMBER=250000 \
         -DSQLITE_MAX_MMAP_SIZE=1099511627776 \
 	    $(SQLITE_FLAGS) \
-	    $(SQLITE_OUT)/sqlite3mc.c
+	    $(SQLITE_OUT)/sqlite3mc_amalgamation.c
 
-$(SQLITE_SOURCE)/sqlite3mc.h: $(SQLITE_UNPACKED)
+$(SQLITE_SOURCE)/sqlite3mc_amalgamation.h: $(SQLITE_UNPACKED)
 
 $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_HEADER) $(SQLITE_OBJ) $(SRC)/org/sqlite/core/NativeDB.c $(TARGET)/common-lib/NativeDB.h
 	@mkdir -p $(@D)
@@ -120,7 +124,7 @@ NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
 # Disabled linux-armv6 build because of this issue; https://github.com/dockcross/dockcross/issues/190
-native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv7 linux-arm64 linux-android-arm linux-ppc64
+native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv7 linux-arm64 linux-android-arm linux-ppc64 alpine-linux64
 
 native: $(NATIVE_DLL)
 
@@ -145,7 +149,7 @@ linux64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work gillena/sqlite-build-env bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
 
 alpine-linux64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux-Alpine OS_ARCH=x86_64'
 
 linux-arm: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-armv5 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/xcc/armv5-unknown-linux-gnueabi/bin/armv5-unknown-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
@@ -154,7 +158,7 @@ linux-armv6: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-armv6 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=arm-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armv6'
 
 linux-armv7: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-armv7 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/xcc/armv7-unknown-linux-gnueabi/bin/armv7-unknown-linux-gnueabi- OS_NAME=Linux OS_ARCH=armv7'
+	./docker/dockcross-armv7a -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/xcc/arm-cortexa8_neon-linux-gnueabihf/bin/arm-cortexa8_neon-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armv7'
 
 linux-arm64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/xcc/aarch64-unknown-linux-gnueabi/bin/aarch64-unknown-linux-gnueabi- OS_NAME=Linux OS_ARCH=aarch64'
