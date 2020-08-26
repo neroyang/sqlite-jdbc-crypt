@@ -34,8 +34,7 @@ $(SQLITE_ARCHIVE):
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	unzip -qo $< -d $(TARGET)/$(version)
-	(mv $(TARGET)/tmp.$(version)/$(SQLITE_AMAL_PREFIX) $(TARGET) && rmdir $(TARGET)/tmp.$(version)) || mv $(TARGET)/tmp.$(version)/ $(TARGET)/$(SQLITE_AMAL_PREFIX)
-	if [ -d "$(TARGET)/$(version)/src" ] ; then mv $(TARGET)/$(version)/src $(TARGET)/$(SQLITE_AMAL_PREFIX);fi
+	if [ -d "$(TARGET)/$(version)" ] ; then mv $(TARGET)/$(version) $(TARGET)/$(SQLITE_AMAL_PREFIX);fi
 	touch $@
 
 
