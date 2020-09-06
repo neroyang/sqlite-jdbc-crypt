@@ -32,7 +32,8 @@ import org.sqlite.util.OSInfoTest;
     BusyHandlerTest.class,
     // SQLiteMC related Tests
     SQLiteMCPragmaTest.class,
-    SQLiteMCSQLInterfaceTest.class
+    SQLiteMCSQLInterfaceTest.class,
+    SQLiteMCURIInterfaceTest.class
 
 })
 public class AllTests {
