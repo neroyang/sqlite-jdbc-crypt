@@ -444,21 +444,21 @@ Connection connection = SQLiteMCChacha20Config.getDefault().withKey("Key").creat
 
 ##### Configure using SQL specific SQL functions
 
-**wxSQLite3** additionally defines the `wxsqlite3_config()` SQL function which can be used to get or set encryption parameters by using SQL queries.
+**wxSQLite3** additionally defines the `sqlite3mc_config()` SQL function which can be used to get or set encryption parameters by using SQL queries.
 
 | SQL function | Description |
 | :--- | :--- |
-| `wxsqlite3_config(paramName TEXT)` | Get value of database encryption parameter `paramName` |
-| `wxsqlite3_config(paramName TEXT, newValue)` | Set value of database encryption parameter `paramName` to `newValue` |
-| `wxsqlite3_config(cipherName TEXT, paramName TEXT)` | Get value of cipher `cipherName` encryption parameter `paramName` |
-| `wxsqlite3_config(cipherName TEXT, paramName TEXT, newValue)` | Set value of cipher `cipherName` encryption parameter `paramName` to `newValue` |
-| `wxsqlite3_codec_data(paramName TEXT)` | Get value of parameter `paramName` |
-| `wxsqlite3_codec_data(paramName TEXT, schemaName TEXT)` | Get value of parameter `paramName` from schema `schemaName` |
+| `sqlite3mc_config(paramName TEXT)` | Get value of database encryption parameter `paramName` |
+| `sqlite3mc_config(paramName TEXT, newValue)` | Set value of database encryption parameter `paramName` to `newValue` |
+| `sqlite3mc_config(cipherName TEXT, paramName TEXT)` | Get value of cipher `cipherName` encryption parameter `paramName` |
+| `sqlite3mc_config(cipherName TEXT, paramName TEXT, newValue)` | Set value of cipher `cipherName` encryption parameter `paramName` to `newValue` |
+| `sqlite3mc_codec_data(paramName TEXT)` | Get value of parameter `paramName` |
+| `sqlite3mc_codec_data(paramName TEXT, schemaName TEXT)` | Get value of parameter `paramName` from schema `schemaName` |
 
 **Note:** See the [supported cipher](#encryption_config_cipher) the list of possible `cipherName`s.
 
 **Note:** Calling the configuration functions, the `paramName` can have a prefix as decribed bellow.
-wxsqlite3_config() gets or sets encryption parameters which are relevant for the entire database instance. paramName is the name of the parameter which should be get or set. To set a parameter, pass the new parameter value as newValue. To get the current parameter value, pass -1 as newValue.
+sqlite3mc_config() gets or sets encryption parameters which are relevant for the entire database instance. paramName is the name of the parameter which should be get or set. To set a parameter, pass the new parameter value as newValue. To get the current parameter value, pass -1 as newValue.
 
 Parameter names use the following prefixes:
 
