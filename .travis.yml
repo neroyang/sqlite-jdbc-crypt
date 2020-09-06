@@ -31,7 +31,9 @@ before_deploy:
   - echo "Now deploying things !"
   - git config --local user.name "Villena Guillaume"
   - git config --local user.email "guiguivil@gmail.com"
+  - apt get install -y zip
   - source VERSION
+  - zip -r ./sqlite-natives-$version ./src/main/resources/org/sqlite/native
   - make deploy
 addons:
   apt:
@@ -52,6 +54,7 @@ deploy:
     - "/home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-$version.jar.asc"
     - "/home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-$version-javadoc.jar.asc"
     - "/home/travis/build/Willena/sqlite-jdbc-crypt/target/sqlite-jdbc-$version-sources.jar.asc"
+    - "/home/travis/build/Willena/sqlite-jdbc-crypt/sqlite-natives-$version"
 
   skip_cleanup: true
   name: SQLite-jdbc-$version
