@@ -39,11 +39,10 @@ import java.util.TreeSet;
 
 /**
  * SQLite Configuration
- *
+ * <p>
  * See also http://www.sqlite.org/pragma.html
  *
  * @author leo
- *
  */
 public class SQLiteConfig {
     /* Date storage class*/
@@ -66,6 +65,7 @@ public class SQLiteConfig {
     /**
      * Creates an SQLite configuration object using values from the given
      * property object.
+     *
      * @param prop The properties to apply to the configuration.
      */
     public SQLiteConfig(Properties prop) {
@@ -94,6 +94,7 @@ public class SQLiteConfig {
 
     /**
      * Create a new JDBC connection using the current configuration
+     *
      * @return The connection.
      * @throws SQLException
      */
@@ -103,6 +104,7 @@ public class SQLiteConfig {
 
     /**
      * Configures a connection.
+     *
      * @param conn The connection to configure.
      * @throws SQLException
      */
@@ -113,52 +115,52 @@ public class SQLiteConfig {
             pragmaParams.add(each.pragmaName);
         }
 
-        if(conn instanceof SQLiteConnection) {
-            if(pragmaTable.containsKey(Pragma.LIMIT_ATTACHED.pragmaName)) {
+        if (conn instanceof SQLiteConnection) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_ATTACHED.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_ATTACHED, getInteger(Pragma.LIMIT_ATTACHED, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_COLUMN.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_COLUMN.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_COLUMN, getInteger(Pragma.LIMIT_COLUMN, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_COMPOUND_SELECT.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_COMPOUND_SELECT.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_COMPOUND_SELECT, getInteger(Pragma.LIMIT_COMPOUND_SELECT, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_EXPR_DEPTH.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_EXPR_DEPTH.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_EXPR_DEPTH, getInteger(Pragma.LIMIT_EXPR_DEPTH, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_FUNCTION_ARG.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_FUNCTION_ARG.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_FUNCTION_ARG, getInteger(Pragma.LIMIT_FUNCTION_ARG, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_LENGTH.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_LENGTH.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_LENGTH, getInteger(Pragma.LIMIT_LENGTH, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_LIKE_PATTERN_LENGTH, getInteger(Pragma.LIMIT_LIKE_PATTERN_LENGTH, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_SQL_LENGTH.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_SQL_LENGTH.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_SQL_LENGTH, getInteger(Pragma.LIMIT_SQL_LENGTH, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_TRIGGER_DEPTH, getInteger(Pragma.LIMIT_TRIGGER_DEPTH, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_VARIABLE_NUMBER, getInteger(Pragma.LIMIT_VARIABLE_NUMBER, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_VDBE_OP.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_VDBE_OP.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_VDBE_OP, getInteger(Pragma.LIMIT_VDBE_OP, "-1"));
             }
 
-            if(pragmaTable.containsKey(Pragma.LIMIT_WORKER_THREADS.pragmaName)) {
+            if (pragmaTable.containsKey(Pragma.LIMIT_WORKER_THREADS.pragmaName)) {
                 ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_WORKER_THREADS, getInteger(Pragma.LIMIT_WORKER_THREADS, "-1"));
             }
 
@@ -206,11 +208,14 @@ public class SQLiteConfig {
 
         Statement stat = conn.createStatement();
         try {
-            if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
-                String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
+            if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName) || pragmaTable.containsKey(Pragma.KEY.pragmaName)) {
+
+                String password = pragmaTable.getProperty(Pragma.KEY.pragmaName);
+                password = password.isEmpty() ? pragmaTable.getProperty(Pragma.PASSWORD.pragmaName) : password;
+
                 String cipherName = pragmaTable.getProperty(Pragma.CIPHER.pragmaName);
 
-                if (cipherName != null && password != null && !password.isEmpty() ) {
+                if (cipherName != null && password != null && !password.isEmpty()) {
                     // Configure before applying the key
                     // Call the Cipher parameter function
                     SQLiteMCConfig config = new SQLiteMCConfig(toProperties());
@@ -256,8 +261,9 @@ public class SQLiteConfig {
 
     /**
      * Sets a pragma to the given boolean value.
+     *
      * @param pragma The pragma to set.
-     * @param flag The boolean value.
+     * @param flag   The boolean value.
      */
     private void set(Pragma pragma, boolean flag) {
         setPragma(pragma, Boolean.toString(flag));
@@ -265,8 +271,9 @@ public class SQLiteConfig {
 
     /**
      * Sets a pragma to the given int value.
+     *
      * @param pragma The pragma to set.
-     * @param num The int value.
+     * @param num    The int value.
      */
     private void set(Pragma pragma, int num) {
         setPragma(pragma, Integer.toString(num));
@@ -274,7 +281,8 @@ public class SQLiteConfig {
 
     /**
      * Checks if the provided value is the default for a given pragma.
-     * @param pragma The pragma on which to check.
+     *
+     * @param pragma       The pragma on which to check.
      * @param defaultValue The value to check for.
      * @return True if the given value is the default value; false otherwise.
      */
@@ -284,7 +292,8 @@ public class SQLiteConfig {
 
     /**
      * Retrives a pragma integer value.
-     * @param pragma The pragma.
+     *
+     * @param pragma       The pragma.
      * @param defaultValue The default value.
      * @return The value of the pragma or defaultValue.
      */
@@ -294,6 +303,7 @@ public class SQLiteConfig {
 
     /**
      * Checks if the shared cache option is turned on.
+     *
      * @return True if turned on; false otherwise.
      */
     public boolean isEnabledSharedCache() {
@@ -302,6 +312,7 @@ public class SQLiteConfig {
 
     /**
      * Checks if the load extension option is turned on.
+     *
      * @return True if turned on; false otherwise.
      */
     public boolean isEnabledLoadExtension() {
@@ -317,8 +328,9 @@ public class SQLiteConfig {
 
     /**
      * Sets a pragma's value.
+     *
      * @param pragma The pragma to change.
-     * @param value The value to set it to.
+     * @param value  The value to set it to.
      */
     public void setPragma(Pragma pragma, String value) {
         pragmaTable.put(pragma.pragmaName, value);
@@ -327,6 +339,7 @@ public class SQLiteConfig {
     /**
      * Convert this configuration into a Properties object, which can be
      * passed to the {@link DriverManager#getConnection(String, Properties)}.
+     *
      * @return The property object.
      */
     public Properties toProperties() {
@@ -403,7 +416,7 @@ public class SQLiteConfig {
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
         APPLICATION_ID("application_id"),
-// Limits
+        // Limits
         LIMIT_LENGTH("limit_length", "The maximum size of any string or BLOB or table row, in bytes.", null),
         LIMIT_SQL_LENGTH("limit_sql_length", "The maximum length of an SQL statement, in bytes.", null),
         LIMIT_COLUMN("limit_column", "The maximum number of columns in a table definition or in the result set of a SELECT or the maximum number of columns in an index or in an ORDER BY or GROUP BY clause.", null),
@@ -468,6 +481,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the open mode flags.
+     *
      * @param mode The open mode.
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
@@ -477,6 +491,7 @@ public class SQLiteConfig {
 
     /**
      * Re-sets the open mode flags.
+     *
      * @param mode The open mode.
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
@@ -487,6 +502,7 @@ public class SQLiteConfig {
     /**
      * Enables or disables the sharing of the database cache and schema data
      * structures between connections to the same database.
+     *
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/c3ref/enable_shared_cache.html">www.sqlite.org/c3ref/enable_shared_cache.html</a>
      */
@@ -496,6 +512,7 @@ public class SQLiteConfig {
 
     /**
      * Enables or disables extension loading.
+     *
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/c3ref/load_extension.html">www.sqlite.org/c3ref/load_extension.html</a>
      */
@@ -505,6 +522,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the read-write mode for the database.
+     *
      * @param readOnly True for read-only; otherwise read-write.
      */
     public void setReadOnly(boolean readOnly) {
@@ -522,6 +540,7 @@ public class SQLiteConfig {
     /**
      * Changes the maximum number of database disk pages that SQLite will hold
      * in memory at once per open database file.
+     *
      * @param numberOfPages Cache size in number of pages.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */
@@ -531,6 +550,7 @@ public class SQLiteConfig {
 
     /**
      * Enables or disables case sensitive for the LIKE operator.
+     *
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_case_sensitive_like">www.sqlite.org/pragma.html#pragma_case_sensitive_like</a>
      */
@@ -539,11 +559,10 @@ public class SQLiteConfig {
     }
 
     /**
-     * @deprecated
-     * Enables or disables the count-changes flag. When enabled, INSERT, UPDATE
-     * and DELETE statements return the number of rows they modified.
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_count_changes">www.sqlite.org/pragma.html#pragma_count_changes</a>
+     * @deprecated Enables or disables the count-changes flag. When enabled, INSERT, UPDATE
+     * and DELETE statements return the number of rows they modified.
      */
     @Deprecated
     public void enableCountChanges(boolean enable) {
@@ -554,6 +573,7 @@ public class SQLiteConfig {
      * Sets the suggested maximum number of database disk pages that SQLite will
      * hold in memory at once per open database file. The cache size set here
      * persists across database connections.
+     *
      * @param numberOfPages Cache size in number of pages.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */
@@ -564,6 +584,7 @@ public class SQLiteConfig {
     /**
      * Defers enforcement of foreign key constraints until the outermost
      * transaction is committed.
+     *
      * @param enable True to enable; false to disable;
      * @see <a href="https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys">https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys</a>
      */
@@ -572,11 +593,10 @@ public class SQLiteConfig {
     }
 
     /**
-     * @deprecated
-     * Enables or disables the empty_result_callbacks flag.
      * @param enable True to enable; false to disable.
-     * false.
+     *               false.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks">http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks</a>
+     * @deprecated Enables or disables the empty_result_callbacks flag.
      */
     @Deprecated
     public void enableEmptyResultCallBacks(boolean enable) {
@@ -585,6 +605,7 @@ public class SQLiteConfig {
 
     /**
      * The common interface for retrieving the available pragma parameter values.
+     *
      * @author leo
      */
     private static interface PragmaValue {
@@ -593,6 +614,7 @@ public class SQLiteConfig {
 
     /**
      * Convert the given enum values to a string array
+     *
      * @param list Array if PragmaValue.
      * @return String array of Enum values
      */
@@ -643,6 +665,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the text encoding used by the main database.
+     *
      * @param encoding One of {@link Encoding}
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_encoding">www.sqlite.org/pragma.html#pragma_encoding</a>
      */
@@ -654,6 +677,7 @@ public class SQLiteConfig {
      * Whether to enforce foreign key constraints. This setting affects the
      * execution of all statements prepared using the database connection,
      * including those prepared before the setting was changed.
+     *
      * @param enforce True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_foreign_keys">www.sqlite.org/pragma.html#pragma_foreign_keys</a>
      */
@@ -662,12 +686,11 @@ public class SQLiteConfig {
     }
 
     /**
-     * @deprecated
-     * Enables or disables the full_column_name flag. This flag together with
-     * the short_column_names flag determine the way SQLite assigns names to
-     * result columns of SELECT statements.
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_full_column_names">www.sqlite.org/pragma.html#pragma_full_column_names</a>
+     * @deprecated Enables or disables the full_column_name flag. This flag together with
+     * the short_column_names flag determine the way SQLite assigns names to
+     * result columns of SELECT statements.
      */
     @Deprecated
     public void enableFullColumnNames(boolean enable) {
@@ -679,6 +702,7 @@ public class SQLiteConfig {
      * not the F_FULLFSYNC syncing method is used on systems that support it.
      * The default value of the fullfsync flag is off. Only Mac OS X supports
      * F_FULLFSYNC.
+     *
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_fullfsync">www.sqlite.org/pragma.html#pragma_fullfsync</a>
      */
@@ -690,6 +714,7 @@ public class SQLiteConfig {
      * Sets the incremental_vacuum value; the number of pages to be removed from
      * the <a href="http://www.sqlite.org/fileformat2.html#freelist">freelist</a>.
      * The database file is truncated by the same amount.
+     *
      * @param numberOfPagesToBeRemoved The number of pages to be removed.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_incremental_vacuum">www.sqlite.org/pragma.html#pragma_incremental_vacuum</a>
      */
@@ -700,6 +725,7 @@ public class SQLiteConfig {
     /**
      * Sets the journal mode for databases associated with the current database
      * connection.
+     *
      * @param mode One of {@link JournalMode}
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_journal_mode">www.sqlite.org/pragma.html#pragma_journal_mode</a>
      */
@@ -711,6 +737,7 @@ public class SQLiteConfig {
      * Sets the journal_size_limit. This setting limits the size of the
      * rollback-journal and WAL files left in the file-system after transactions
      * or checkpoints.
+     *
      * @param limit Limit value in bytes. A negative number implies no limit.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_journal_size_limit">www.sqlite.org/pragma.html#pragma_journal_size_limit</a>
      */
@@ -724,6 +751,7 @@ public class SQLiteConfig {
      * writable by all versions of SQLite going back to 3.0.0. When the flag is
      * off, new databases are created using the latest file format which might
      * not be readable or writable by versions of SQLite prior to 3.3.0.
+     *
      * @param use True to turn on legacy file format; false to turn off.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_legacy_file_format">www.sqlite.org/pragma.html#pragma_legacy_file_format</a>
      */
@@ -741,6 +769,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the database connection locking-mode.
+     *
      * @param mode One of {@link LockingMode}
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_locking_mode">www.sqlite.org/pragma.html#pragma_locking_mode</a>
      */
@@ -755,6 +784,7 @@ public class SQLiteConfig {
     /**
      * Sets the page size of the database. The page size must be a power of two
      * between 512 and 65536 inclusive.
+     *
      * @param numBytes A power of two between 512 and 65536 inclusive.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_page_size">www.sqlite.org/pragma.html#pragma_page_size</a>
      */
@@ -764,6 +794,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the maximum number of pages in the database file.
+     *
      * @param numPages Number of pages.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_max_page_count">www.sqlite.org/pragma.html#pragma_max_page_count</a>
      */
@@ -773,8 +804,9 @@ public class SQLiteConfig {
 
     /**
      * Enables or disables useReadUncommitedIsolationMode.
+     *
      * @param useReadUncommitedIsolationMode True to turn on; false to disable.
-     * disabled otherwise.
+     *                                       disabled otherwise.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_read_uncommitted">www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
      */
     public void setReadUncommited(boolean useReadUncommitedIsolationMode) {
@@ -783,6 +815,7 @@ public class SQLiteConfig {
 
     /**
      * Enables or disables the recursive trigger capability.
+     *
      * @param enable True to enable the recursive trigger capability.
      * @see <a href="www.sqlite.org/pragma.html#pragma_recursive_triggers">www.sqlite.org/pragma.html#pragma_recursive_triggers</a>
      */
@@ -795,6 +828,7 @@ public class SQLiteConfig {
      * causes SELECT statements without an ORDER BY clause to emit their results
      * in the reverse order of what they normally would. This can help debug
      * applications that are making invalid assumptions about the result order.
+     *
      * @param enable True to enable reverse_unordered_selects.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects">www.sqlite.org/pragma.html#pragma_reverse_unordered_selects</a>
      */
@@ -805,6 +839,7 @@ public class SQLiteConfig {
     /**
      * Enables or disables the short_column_names flag. This flag affects the
      * way SQLite names columns of data returned by SELECT statements.
+     *
      * @param enable True to enable short_column_names.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_short_column_names">www.sqlite.org/pragma.html#pragma_short_column_names</a>
      */
@@ -822,15 +857,16 @@ public class SQLiteConfig {
 
     /**
      * Changes the setting of the "synchronous" flag.
+     *
      * @param mode One of {@link SynchronousMode}:<ul>
-     * <li> OFF - SQLite continues without syncing as soon as it has handed
-     * data off to the operating system</li>
-     * <li> NORMAL - the SQLite database engine will still sync at the most
-     * critical moments, but less often than in FULL mode</li>
-     * <li> FULL - the SQLite database engine will use the xSync method of the
-     * VFS to ensure that all content is safely written to the disk surface
-     * prior to continuing. This ensures that an operating system crash or power
-     * failure will not corrupt the database.</li></ul>
+     *             <li> OFF - SQLite continues without syncing as soon as it has handed
+     *             data off to the operating system</li>
+     *             <li> NORMAL - the SQLite database engine will still sync at the most
+     *             critical moments, but less often than in FULL mode</li>
+     *             <li> FULL - the SQLite database engine will use the xSync method of the
+     *             VFS to ensure that all content is safely written to the disk surface
+     *             prior to continuing. This ensures that an operating system crash or power
+     *             failure will not corrupt the database.</li></ul>
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_synchronous">www.sqlite.org/pragma.html#pragma_synchronous</a>
      */
     public void setSynchronous(SynchronousMode mode) {
@@ -848,10 +884,11 @@ public class SQLiteConfig {
 
     /**
      * Changes the setting of the "hexkey" flag.
+     *
      * @param mode One of {@link HexKeyMode}:<ul>
-     * <li> NONE - SQLite uses a string based password</li>
-     * <li> SSE - the SQLite database engine will use pragma hexkey = '' to set the password</li>
-     * <li> SQLCIPHER - the SQLite database engine calls pragma key = "x''" to set the password</li></ul>
+     *             <li> NONE - SQLite uses a string based password</li>
+     *             <li> SSE - the SQLite database engine will use pragma hexkey = '' to set the password</li>
+     *             <li> SQLCIPHER - the SQLite database engine calls pragma key = "x''" to set the password</li></ul>
      */
     public void setHexKeyMode(HexKeyMode mode) {
         setPragma(Pragma.HEXKEY_MODE, mode.name());
@@ -868,14 +905,15 @@ public class SQLiteConfig {
 
     /**
      * Changes the setting of the "temp_store" parameter.
+     *
      * @param storeType One of {@link TempStore}:<ul>
-     * <li> DEFAULT - the compile-time C preprocessor macro SQLITE_TEMP_STORE
-     * is used to determine where temporary tables and indices are stored</li>
-     * <li>FILE - temporary tables and indices are stored in a file.</li></ul>
-     * <li>MEMORY - temporary tables and indices are kept in as if they were pure
-     * in-memory databases memory</li>
+     *                  <li> DEFAULT - the compile-time C preprocessor macro SQLITE_TEMP_STORE
+     *                  is used to determine where temporary tables and indices are stored</li>
+     *                  <li>FILE - temporary tables and indices are stored in a file.</li></ul>
+     *                  <li>MEMORY - temporary tables and indices are kept in as if they were pure
+     *                  in-memory databases memory</li>
      * @see <a
-     *      href="http://www.sqlite.org/pragma.html#pragma_temp_store">www.sqlite.org/pragma.html#pragma_temp_store</a>
+     * href="http://www.sqlite.org/pragma.html#pragma_temp_store">www.sqlite.org/pragma.html#pragma_temp_store</a>
      */
     public void setTempStore(TempStore storeType) {
         setPragma(Pragma.TEMP_STORE, storeType.name());
@@ -884,6 +922,7 @@ public class SQLiteConfig {
     /**
      * Changes the value of the sqlite3_temp_directory global variable, which many operating-system
      * interface backends use to determine where to store temporary tables and indices.
+     *
      * @param directoryName Directory name for storing temporary tables and indices.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_temp_store_directory">www.sqlite.org/pragma.html#pragma_temp_store_directory</a>
      */
@@ -895,6 +934,7 @@ public class SQLiteConfig {
      * Set the value of the user-version. The user-version is not used
      * internally by SQLite. It may be used by applications for any purpose. The
      * value is stored in the database header at offset 60.
+     *
      * @param version A big-endian 32-bit signed integer.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_user_version">www.sqlite.org/pragma.html#pragma_user_version</a>
      */
@@ -908,6 +948,7 @@ public class SQLiteConfig {
      * should set the Application ID integer to a unique integer so that utilities such as file(1)
      * can determine the specific file type. The
      * value is stored in the database header at offset 68.
+     *
      * @param id A big-endian 32-bit unsigned integer.
      * @see <a href="http://sqlite.org/pragma.html#pragma_application_id">www.sqlite.org/pragma.html#pragma_application_id</a>
      */
@@ -936,6 +977,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the mode that will be used to start transactions.
+     *
      * @param transactionMode One of {@link TransactionMode}.
      * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
@@ -945,6 +987,7 @@ public class SQLiteConfig {
 
     /**
      * Sets the mode that will be used to start transactions.
+     *
      * @param transactionMode One of DEFERRED, IMMEDIATE or EXCLUSIVE.
      * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
