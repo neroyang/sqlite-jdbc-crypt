@@ -77,12 +77,17 @@ public class SQLiteConfig {
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
-        // Shared Cache
+        // Shared Cache (Global)
         setSharedCache(Boolean.parseBoolean(pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName, "false")));
+
+        // Shared Cache (Connection)
+        if (pragmaTable.getProperty(Pragma.CACHE.pragmaName, Cache.PRIVATE.getValue()).equalsIgnoreCase(Cache.SHARED.getValue())) {
+            setOpenMode(SQLiteOpenMode.SHAREDCACHE);
+        }
+
         // Enable URI filenames
         setOpenMode(SQLiteOpenMode.OPEN_URI);
 
-        pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000");
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
     }
 
@@ -166,6 +171,7 @@ public class SQLiteConfig {
 
         pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
         pragmaParams.remove(Pragma.SHARED_CACHE.pragmaName);
+        pragmaParams.remove(Pragma.CACHE.pragmaName);
         pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
         pragmaParams.remove(Pragma.DATE_PRECISION.pragmaName);
         pragmaParams.remove(Pragma.DATE_CLASS.pragmaName);
@@ -300,12 +306,21 @@ public class SQLiteConfig {
     }
 
     /**
-     * Checks if the shared cache option is turned on.
+     * Checks if the shared cache option (global) is turned on.
      *
      * @return True if turned on; false otherwise.
      */
     public boolean isEnabledSharedCache() {
         return getBoolean(Pragma.SHARED_CACHE, "false");
+    }
+
+    /**
+     * Checks if the shared cache (connection) option is turned on.
+     *
+     * @return True if turned on; false otherwise.
+     */
+    public boolean isEnabledSharedCacheConnection() {
+        return pragmaTable.getProperty(Pragma.CACHE.pragmaName, Cache.PRIVATE.getValue()).equalsIgnoreCase(Cache.SHARED.getValue());
     }
 
     /**
@@ -382,7 +397,8 @@ public class SQLiteConfig {
 
         // Parameters requiring SQLite3 API invocation
         OPEN_MODE("open_mode", "Database open-mode flag", null),
-        SHARED_CACHE("shared_cache", "Enable SQLite Shared-Cache mode, native driver only", OnOff),
+        SHARED_CACHE("shared_cache", "Enable SQLite Shared-Cache mode (global)", OnOff),
+        CACHE("cache", "Enable SQLite Shared-Cache mode (connection)", toStringArray(Cache.values())),
         LOAD_EXTENSION("enable_load_extension", "Enable SQLite load_extention() function, native driver only", OnOff),
 
         // Pragmas that can be set after opening the database
@@ -500,13 +516,22 @@ public class SQLiteConfig {
 
     /**
      * Enables or disables the sharing of the database cache and schema data
-     * structures between connections to the same database.
+     * structures between connections to the same database (global).
      *
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/c3ref/enable_shared_cache.html">www.sqlite.org/c3ref/enable_shared_cache.html</a>
      */
     public void setSharedCache(boolean enable) {
         set(Pragma.SHARED_CACHE, enable);
+    }
+    /**
+     * Enables or disables the sharing of the database cache and schema data
+     * structures between connections to the same database (connection).
+     *
+     * @see <a href="https://www.sqlite.org/sharedcache.html#enabling_shared_cache_mode">www.sqlite.org/sharedcache.html#enabling_shared_cache_mode</a>
+     */
+    public void setCacheMode(Cache value) {
+        setPragma(Pragma.CACHE, value.name());
     }
 
     /**
@@ -664,6 +689,14 @@ public class SQLiteConfig {
 
     public static enum AutoVacuum implements PragmaValue {
         NONE, FULL, INCREMENTAL;
+
+        public String getValue() {
+            return name();
+        }
+    }
+
+    public static enum Cache implements PragmaValue {
+        PRIVATE, SHARED;
 
         public String getValue() {
             return name();

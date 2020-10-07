@@ -31,6 +31,7 @@ import org.sqlite.util.OSInfoTest;
         JSON1Test.class,
         ProgressHandlerTest.class,
         BusyHandlerTest.class,
+        ParametersTest.class,
         // SQLiteMC related Tests
         SQLiteMCPragmaTest.class,
         SQLiteMCSQLInterfaceTest.class,

@@ -121,6 +121,16 @@ public class SQLiteDataSource implements DataSource
     }
 
     /**
+     * Enables or disables the sharing of the database cache and schema data
+     * structures between connections to the same database.
+     * @param enable True to enable; false to disable.
+     * @see <a href="http://www.sqlite.org/c3ref/enable_shared_cache.html">http://www.sqlite.org/c3ref/enable_shared_cache.html</a>
+     */
+    public void setSharedCacheConnection(boolean enable) {
+        config.setCacheMode(enable ? Cache.SHARED : Cache.PRIVATE);
+    }
+
+    /**
      * Enables or disables extension loading.
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/c3ref/load_extension.html">http://www.sqlite.org/c3ref/load_extension.html</a>
