@@ -399,6 +399,7 @@ public class SQLiteConfig {
         FOREIGN_KEYS("foreign_keys", OnOff),
         FULL_COLUMN_NAMES("full_column_names", OnOff),
         FULL_SYNC("fullsync", OnOff),
+        AUTO_VACUUM("auto_vacuum", toStringArray(AutoVacuum.values())),
         INCREMENTAL_VACUUM("incremental_vacuum"),
         JOURNAL_MODE("journal_mode", toStringArray(JournalMode.values())),
         JOURNAL_SIZE_LIMIT("journal_size_limit"),
@@ -663,6 +664,14 @@ public class SQLiteConfig {
         }
     }
 
+    public static enum AutoVacuum implements PragmaValue {
+        NONE, FULL, INCREMENTAL;
+
+        public String getValue() {
+            return name();
+        }
+    }
+
     /**
      * Sets the text encoding used by the main database.
      *
@@ -708,6 +717,15 @@ public class SQLiteConfig {
      */
     public void enableFullSync(boolean enable) {
         set(Pragma.FULL_SYNC, enable);
+    }
+
+    /**
+     * Sets the auto vacuum mode;
+     *
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_auto_vacuum">www.sqlite.org/pragma.html#pragma_auto_vacuum</a>
+     */
+    public void setAutoVacuum(AutoVacuum value) {
+        setPragma(Pragma.AUTO_VACUUM, value.name());
     }
 
     /**
