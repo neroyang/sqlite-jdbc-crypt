@@ -51,8 +51,6 @@ public class SQLiteConfig {
     private final Properties pragmaTable;
     private int openModeFlag = 0x00;
 
-    private final int busyTimeout;
-
     private final SQLiteConnectionConfig defaultConnectionConfig;
 
     /**
@@ -84,7 +82,7 @@ public class SQLiteConfig {
         // Enable URI filenames
         setOpenMode(SQLiteOpenMode.OPEN_URI);
 
-        this.busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
+        pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000");
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
     }
 
@@ -1063,7 +1061,6 @@ public class SQLiteConfig {
      * @param dateStringFormat Format of date string
      */
     public void setDateStringFormat(String dateStringFormat) {
-
         this.defaultConnectionConfig.setDateStringFormat(dateStringFormat);
     }
 
@@ -1075,6 +1072,6 @@ public class SQLiteConfig {
     }
 
     public int getBusyTimeout() {
-        return busyTimeout;
+        return getInteger(Pragma.BUSY_TIMEOUT, "3000");
     }
 }
