@@ -78,10 +78,10 @@ public class SQLiteConfig {
             setOpenMode(SQLiteOpenMode.CREATE);
         }
         // Shared Cache (Global)
-        setSharedCache(Boolean.parseBoolean(pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName, "false")));
+        setSharedCache(isEnabledSharedCache());
 
         // Shared Cache (Connection)
-        if (pragmaTable.getProperty(Pragma.CACHE.pragmaName, Cache.PRIVATE.getValue()).equalsIgnoreCase(Cache.SHARED.getValue())) {
+        if (isEnabledSharedCacheConnection()) {
             setOpenMode(SQLiteOpenMode.SHAREDCACHE);
         }
 
