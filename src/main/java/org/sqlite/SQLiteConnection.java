@@ -9,9 +9,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -500,6 +502,16 @@ public abstract class SQLiteConnection
                     throw new SQLException(String.format("Please specify a value for PRAGMA %s in URL %s", key, url));
                 }
                 String value = kvp[1].trim();
+
+                //Special case for keys given by URL. Should be URL encoded
+                if (key.equals(SQLiteConfig.Pragma.KEY.pragmaName)){
+                    try {
+                        value = URLDecoder.decode(value, "utf8");
+                    } catch (UnsupportedEncodingException ignored) {
+                        value = kvp[1].trim();
+                    }
+                }
+
                 if (!value.isEmpty()) {
                     if (prop.containsKey(key)) {
                         //
