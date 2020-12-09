@@ -154,6 +154,45 @@ public class SQLiteMCPragmaTest {
     }
 
     @Test
+    public void defaultCihperDatabaseWithSpecialKeyTest() throws IOException, SQLException {
+        SQLiteMCConfig config = new SQLiteMCConfig();
+        String path = createFile();
+        // 1. Open + Write + cipher with "Key1" key
+        String Key1 = "Key1&az=uies%63";
+        String Key2 = "Key1";
+
+        cipherDatabaseCreate(config, path, Key1);
+
+        //2. Ensure db is readable with good Password
+        Connection c = cipherDatabaseOpen(config, path, Key1);
+        assertTrue(
+            String.format("1. Be sure the database with config %s can be read with the key '%s'", config.getClass().getSimpleName(), Key1)
+            , databaseIsReadable(c));
+        c.close();
+
+        //3. Ensure db is not readable without the good password (Using Key2 as password)
+        c = cipherDatabaseOpen(config, path, Key2);
+        assertNull(
+            String.format("2 Be sure the database with config %s cannot be read with the key '%s' (good key is %s)", config.getClass().getSimpleName(), Key2, Key1),
+            c);
+
+        //4. Rekey the database
+        c = cipherDatabaseOpen(config, path, Key1);
+        assertTrue(String.format("3. Be sure the database with config %s can be read before rekeying with the key '%s' (replacing %s with %s)", config.getClass().getSimpleName(), Key2, Key1, Key2)
+            , databaseIsReadable(c));
+        c.createStatement().execute(String.format("PRAGMA rekey=%s", Key2));
+        assertTrue("4. Be sure the database is still readable after rekeying"
+            , databaseIsReadable(c));
+        c.close();
+
+        //5. Should now be readable with Key2
+        c = cipherDatabaseOpen(config, path, Key2);
+        assertTrue(String.format("5. Should now be able to open the database with config %s and the new key '%s'", config.getClass().getSimpleName(), Key2)
+            , databaseIsReadable(c));
+        c.close();
+    }
+
+    @Test
     public void crossCipherAlgorithmTest() throws IOException, SQLException {
         String dbfile = createFile();
         String key = "key";

@@ -5,6 +5,7 @@ import org.sqlite.mc.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.*;
 
 import static org.junit.Assert.*;
@@ -147,6 +148,53 @@ public class SQLiteMCURIInterfaceTest {
 
     }
 
+
+    @Test
+    public void sqlCipherDatabaseSpecialKeyTest() throws SQLException, IOException {
+
+        String dbfile = createFile();
+        String Key1 = URLEncoder.encode("Key2&2ax", "utf8");
+        String Key2 = "Key2";
+        cipherDatabaseCreate(dbfile, Key1);
+
+        //2. Ensure db is readable with good Password
+        Connection c = cipherDatabaseOpen(dbfile, Key1);
+        assertTrue(
+            String.format("1. Be sure the database with config %s can be read with the key '%s'", "SQLCipher", Key1)
+            , databaseIsReadable(c));
+        c.close();
+
+        //3. Ensure not readable with wrong key
+        Connection c2 = cipherDatabaseOpen(dbfile, Key2);
+        assertFalse(
+            String.format("2. Be sure the database with config %s cannot be read with the key '%s'", "SQLCipher", Key2)
+            , databaseIsReadable(c2));
+        c.close();
+
+    }
+
+
+    @Test
+    public void sqlCipherDatabaseSpacialKeyTest() throws SQLException, IOException{
+        String dbfile = createFile();
+        String Key1 = URLEncoder.encode("Key2&2ax", "utf8");
+        String Key2 = "Key2&2ax";
+        cipherDatabaseCreate(dbfile, Key1);
+
+        //2. Ensure db is readable with Key1 Password URL access
+        Connection c = cipherDatabaseOpen(dbfile, Key1);
+        assertTrue(
+            String.format("1. Be sure the database with config %s can be read with the key '%s'", "SQLCipher", Key1)
+            , databaseIsReadable(c));
+        c.close();
+
+        //3. Make sure we can read the database using the SQL interface
+        c = new SQLiteMCSqlCipherConfig().setKdfIter(4000).setLegacy(1).withKey(Key2).useSQLInterface(true).createConnection("jdbc:sqlite:file:" + dbfile);
+        assertTrue(
+            String.format("2. Be sure the database is readable using two method and key containing special characters")
+            , databaseIsReadable(c));
+        c.close();
+    }
 
     @Test
     public void sqlCipherDatabaseTest() throws IOException, SQLException {
