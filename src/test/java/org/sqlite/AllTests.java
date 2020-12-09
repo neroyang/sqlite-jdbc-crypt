@@ -11,7 +11,7 @@ import org.sqlite.util.OSInfoTest;
     ConnectionTest.class,
     DBMetaDataTest.class,
     ErrorMessageTest.class,
-    ExtendedCommandTest.class,
+    //ExtendedCommandTest.class, //Backup / restore API is disabled
     ExtensionTest.class,
     FetchSizeTest.class,
     InsertQueryTest.class,
