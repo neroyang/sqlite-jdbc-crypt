@@ -188,7 +188,7 @@ public class SQLiteConfig {
         pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
 
 
-        //Remove SQLiteMC related PRAGMAS, so that we are not applying twice the configuration
+        //Remove SQLiteMC related PRAGMAS, so that we are not applied twice
         //TODO : Clone the pragmaTable and remove each Pragma when used so that no checking is required ?
         // will make a lighter code ?
         pragmaParams.remove(Pragma.KEY.pragmaName);
@@ -205,6 +205,8 @@ public class SQLiteConfig {
         pragmaParams.remove(Pragma.KDF_ALGORITHM.pragmaName);
         pragmaParams.remove(Pragma.HMAC_ALGORITHM.pragmaName);
         pragmaParams.remove(Pragma.PLAINTEXT_HEADER_SIZE.pragmaName);
+        pragmaParams.remove(Pragma.MC_USE_SQL_INTERFACE.pragmaName);
+
 
         Statement stat = conn.createStatement();
         try {
@@ -454,7 +456,8 @@ public class SQLiteConfig {
         HMAC_SALT_MASK("hmac_salt_mask", null),
         KDF_ALGORITHM("kdf_algorithm", null),
         HMAC_ALGORITHM("hmac_algorithm", null),
-        PLAINTEXT_HEADER_SIZE("plaintext_header_size", null);
+        PLAINTEXT_HEADER_SIZE("plaintext_header_size", null),
+        MC_USE_SQL_INTERFACE("mc_use_sql_interface", OnOff);
 
         public final String pragmaName;
         public final String[] choices;

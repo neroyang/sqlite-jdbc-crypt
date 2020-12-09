@@ -13,8 +13,8 @@ public class SQLiteMCConfig extends SQLiteConfig {
 
     private static final Pragma[] CIPHER_PRAGMA_ORDER = new Pragma[]{
         Pragma.CIPHER,
-        Pragma.HMAC_CHECK,
         Pragma.LEGACY,
+        Pragma.HMAC_CHECK,
         Pragma.LEGACY_PAGE_SIZE,
         Pragma.KDF_ITER,
         Pragma.FAST_KDF_ITER,
@@ -33,8 +33,6 @@ public class SQLiteMCConfig extends SQLiteConfig {
     public SQLiteMCConfig(Properties prop) {
         super(prop);
     }
-
-    private boolean useSQLInterface = false;
 
     protected boolean isValid(Integer value, int min, int max) {
         return (value >= min && value <= max);
@@ -110,16 +108,18 @@ public class SQLiteMCConfig extends SQLiteConfig {
     }
 
     public SQLiteMCConfig useSQLInterface(boolean sqlInterface) {
-        this.useSQLInterface = sqlInterface;
+        setPragma(Pragma.MC_USE_SQL_INTERFACE, sqlInterface?"true":"false");
         return this;
     }
 
     public void applyCipherParameters(Connection conn, Statement stat) throws SQLException {
-        applyCipherParametersByNames(CIPHER_PRAGMA_ORDER, conn, stat, useSQLInterface);
+        applyCipherParametersByNames(CIPHER_PRAGMA_ORDER, conn, stat);
     }
 
-    protected void applyCipherParametersByNames(Pragma[] pragmas, Connection conn, Statement statement, boolean useSQLInterface) throws SQLException {
+    protected void applyCipherParametersByNames(Pragma[] pragmas, Connection conn, Statement statement) throws SQLException {
         Properties p = super.toProperties();
+
+        boolean useSQLInterface = Boolean.parseBoolean(p.getProperty(Pragma.MC_USE_SQL_INTERFACE.getPragmaName(), "false" ));
 
         String cipherProperty = p.getProperty(Pragma.CIPHER.getPragmaName(), null);
         if (cipherProperty == null)
