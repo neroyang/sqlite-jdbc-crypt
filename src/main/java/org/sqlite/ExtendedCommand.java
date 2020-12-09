@@ -40,10 +40,10 @@ public class ExtendedCommand
         if (sql == null)
             return null;
 
-//        if (sql.startsWith("backup"))
-//            return BackupCommand.parse(sql);
-//        else if (sql.startsWith("restore"))
-//            return RestoreCommand.parse(sql);
+        if (sql.startsWith("backup"))
+            return BackupCommand.parse(sql);
+        else if (sql.startsWith("restore"))
+            return RestoreCommand.parse(sql);
 
         return null;
     }
@@ -103,7 +103,7 @@ public class ExtendedCommand
         }
 
         public void execute(DB db) throws SQLException {
-            //db.backup(srcDB, destFile, null);
+            db.backup(srcDB, destFile, null);
         }
 
     }
@@ -149,7 +149,7 @@ public class ExtendedCommand
          * @see org.sqlite.ExtendedCommand.SQLExtension#execute(org.sqlite.core.DB)
          */
         public void execute(DB db) throws SQLException {
-            //db.restore(targetDB, srcFile, null);
+            db.restore(targetDB, srcFile, null);
         }
     }
 
