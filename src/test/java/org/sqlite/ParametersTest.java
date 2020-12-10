@@ -1,13 +1,5 @@
 package org.sqlite;
 
-/*
- * Copyright (c) 2020 INPUTsys Software Solutions GmbH
- *
- * Nutzungsbedingungen für Fremdfirmen auf Basis der vertraglichen Vereinbarungen. Eine anderweitige Nutzung oder eine
- * Weitergabe des Codes in Quell- oder Maschinenform ist untersagt. Die Haftung der INPUTsys Software Solutions GmbH
- * beschränkt sich auf eigene Entwicklungen. Eine Haftung für modifizierte Software kann nicht übernommen werden.
- */
-
 import org.junit.Test;
 
 import java.io.File;
