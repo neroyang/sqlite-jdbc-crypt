@@ -133,16 +133,13 @@ public class SQLiteMCConfig extends SQLiteConfig {
                     statement.execute(String.format("PRAGMA %s = %s", pragma.getPragmaName(), property));
                 else {
                     if (pragma.equals(Pragma.CIPHER)) {
-                        PreparedStatement preparedStatement = conn.prepareStatement("SELECT sqlite3mc_config(?, ?);");
-                        preparedStatement.setString(1, pragma.name());
-                        preparedStatement.setString(2, cipherProperty);
-                        preparedStatement.execute();
+                        String sql = String.format("SELECT sqlite3mc_config('default:%s', '%s');", pragma.getPragmaName(), cipherProperty);
+                        System.out.println(sql);
+                        conn.createStatement().execute(sql);
                     } else {
-                        PreparedStatement preparedStatement = conn.prepareStatement("SELECT sqlite3mc_config(?, ?, ?);");
-                        preparedStatement.setString(1, cipherProperty);
-                        preparedStatement.setString(2, pragma.name().toLowerCase());
-                        preparedStatement.setString(3, property);
-                        preparedStatement.execute();
+                        String sql = String.format("SELECT sqlite3mc_config('%s', 'default:%s', %s);", cipherProperty, pragma.getPragmaName(), property);
+                        System.out.println(sql);
+                        conn.createStatement().execute(sql);
                     }
                 }
             }

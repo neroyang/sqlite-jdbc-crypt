@@ -110,7 +110,7 @@ public class SQLiteMCSQLInterfaceTest {
         c = cipherDatabaseOpen(config, path, Key1);
         assertTrue(String.format("3. Be sure the database with config %s can be read before rekeying with the key '%s' (replacing %s with %s)", config.getClass().getSimpleName(), Key2, Key1, Key2)
             , databaseIsReadable(c));
-        c.createStatement().execute(String.format("PRAGMA rekey=%s", Key2));
+        c.createStatement().execute(String.format("PRAGMA rekey='%s'", Key2));
         assertTrue("4. Be sure the database is still readable after rekeying"
             , databaseIsReadable(c));
         c.close();
