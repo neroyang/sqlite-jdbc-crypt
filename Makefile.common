@@ -59,21 +59,21 @@ CROSS_PREFIX :=
 
 Default_CC        := $(CROSS_PREFIX)gcc
 Default_STRIP     := $(CROSS_PREFIX)strip
-Default_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden -std=gnu11 -march=native
+Default_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden -std=gnu11
 Default_LINKFLAGS := -shared
 Default_LIBNAME   := libsqlitejdbc.so
 Default_SQLITE_FLAGS  :=
 
 Linux-x86_CC        := $(CROSS_PREFIX)gcc
 Linux-x86_STRIP     := $(CROSS_PREFIX)strip
-Linux-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -m32 -fvisibility=hidden -march=native
+Linux-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -m32 -fvisibility=hidden
 Linux-x86_LINKFLAGS := -shared -static-libgcc
 Linux-x86_LIBNAME   := libsqlitejdbc.so
 Linux-x86_SQLITE_FLAGS  := 
 
 Linux-x86_64_CC        := $(CROSS_PREFIX)gcc
 Linux-x86_64_STRIP     := $(CROSS_PREFIX)strip
-Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -Os -fPIC -m64 -fvisibility=hidden -march=native
+Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -Os -fPIC -m64 -fvisibility=hidden
 Linux-x86_64_LINKFLAGS := -shared -static-libgcc
 Linux-x86_64_LIBNAME   := libsqlitejdbc.so
 Linux-x86_64_SQLITE_FLAGS  := 
