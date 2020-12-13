@@ -80,35 +80,35 @@ Linux-x86_64_SQLITE_FLAGS  :=
 
 Linux-arm_CC          := $(CROSS_PREFIX)gcc
 Linux-arm_STRIP       := $(CROSS_PREFIX)strip
-Linux-arm_CCFLAGS     := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -mfloat-abi=softfp -mfpu=vfp -fvisibility=hidden -std=gnu11  -march=native
+Linux-arm_CCFLAGS     := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -mfloat-abi=softfp -mfpu=vfp -fvisibility=hidden -std=gnu11
 Linux-arm_LINKFLAGS   := -shared -static-libgcc
 Linux-arm_LIBNAME     := libsqlitejdbc.so
 Linux-arm_SQLITE_FLAGS  :=
 
 Linux-armv6_CC        := $(CROSS_PREFIX)gcc
 Linux-armv6_STRIP     := $(CROSS_PREFIX)strip
-Linux-armv6_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden -std=gnu11  -march=native
+Linux-armv6_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden -std=gnu11
 Linux-armv6_LINKFLAGS := -shared -static-libgcc
 Linux-armv6_LIBNAME   := libsqlitejdbc.so
 Linux-armv6_SQLITE_FLAGS  :=
 
 Linux-armv7_CC        := $(CROSS_PREFIX)gcc
 Linux-armv7_STRIP     := $(CROSS_PREFIX)strip
-Linux-armv7_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden -std=gnu11  -march=native
+Linux-armv7_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden -std=gnu11
 Linux-armv7_LINKFLAGS := -shared -static-libgcc
 Linux-armv7_LIBNAME   := libsqlitejdbc.so
 Linux-armv7_SQLITE_FLAGS  :=
 
 Linux-android-arm_CC        := $(CROSS_PREFIX)gcc
 Linux-android-arm_STRIP     := $(CROSS_PREFIX)strip
-Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog -std=gnu11  -march=native
+Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog -std=gnu11
 Linux-android-arm_LINKFLAGS := -shared -static-libgcc
 Linux-android-arm_LIBNAME   := libsqlitejdbc.so
 Linux-android-arm_SQLITE_FLAGS  :=
 
 Linux-ppc64_CC        := $(CROSS_PREFIX)gcc
 Linux-ppc64_STRIP     := $(CROSS_PREFIX)strip
-Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden -std=gnu11  -march=native
+Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden -std=gnu11
 Linux-ppc64_LINKFLAGS := -shared -static-libgcc
 Linux-ppc64_LIBNAME   := libsqlitejdbc.so
 Linux-ppc64_SQLITE_FLAGS  :=
@@ -136,7 +136,7 @@ OpenBSD-x86_64_SQLITE_FLAGS  :=
 
 SunOS-sparcv9_CC        := $(CROSS_PREFIX)gcc
 SunOS-sparcv9_STRIP     := $(CROSS_PREFIX)strip
-SunOS-sparcv9_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -m64 -fvisibility=hidden  -march=native
+SunOS-sparcv9_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -m64 -fvisibility=hidden
 SunOS-sparcv9_LINKFLAGS := -shared -static-libgcc
 SunOS-sparcv9_LIBNAME   := libsqlitejdbc.so
 SunOS-sparcv9_SQLITE_FLAGS  := 
