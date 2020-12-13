@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Willena/sqlite-jdbc-crypt.svg?branch=master)](https://travis-ci.org/Willena/sqlite-jdbc-crypt)
+[![Build Status](https://travis-ci.com/Willena/sqlite-jdbc-crypt.svg?branch=master)](https://travis-ci.com/Willena/sqlite-jdbc-crypt)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.willena/sqlite-jdbc/badge.svg)](https://search.maven.org/artifact/io.github.willena/sqlite-jdbc/)
 
 # SQLite JDBC Driver 
