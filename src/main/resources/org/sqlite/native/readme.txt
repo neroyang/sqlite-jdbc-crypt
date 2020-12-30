@@ -1,0 +1,2 @@
+Natives libraries must be compiled and added manually to this folder. One folder per platform and one subdir per architecture
+A zip file containing prebuilt binaries for a number of platforms is available with each release.
