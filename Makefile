@@ -67,7 +67,6 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	$(CC) -v
 
 	$(CC) -o $@ -c $(CCFLAGS) \
-		-DHAS_AES_HARDWARE=0 \
         -DCODEC_TYPE=CODEC_TYPE_CHACHA20 \
         -DSQLITE_THREADSAFE=1 \
         -DSQLITE_DQS=0 \
