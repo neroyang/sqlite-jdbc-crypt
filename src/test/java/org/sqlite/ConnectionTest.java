@@ -424,4 +424,54 @@ public class ConnectionTest
     	stat.close();
     	conn.close();
     }
+
+    @Test
+    public void autoVacuumProps() throws Exception {
+        File testDB = File.createTempFile("test.db", "", new File("target"));
+        testDB.deleteOnExit();
+
+        Properties props = new Properties();
+        props.setProperty(SQLiteConfig.Pragma.AUTO_VACUUM.pragmaName, SQLiteConfig.AutoVacuum.INCREMENTAL.name());
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB), props);
+        Statement stat = conn.createStatement();
+
+        ResultSet rs = stat.executeQuery("pragma auto_vacuum");
+        assertEquals("2", rs.getString(1));
+        rs.close();
+
+        stat.close();
+        conn.close();
+    }
+
+    @Test
+    public void autoVacuumUri() throws Exception {
+        File testDB = File.createTempFile("test.db", "", new File("target"));
+        testDB.deleteOnExit();
+
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?auto_vacuum=1", testDB));
+        Statement stat = conn.createStatement();
+
+        ResultSet rs = stat.executeQuery("pragma auto_vacuum");
+        assertEquals("1", rs.getString(1));
+        rs.close();
+
+        stat.close();
+        conn.close();
+    }
+
+    @Test
+    public void autoVacuumUri2() throws Exception {
+        File testDB = File.createTempFile("test.db", "", new File("target"));
+        testDB.deleteOnExit();
+
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?auto_vacuum=INCREMENTAL", testDB));
+        Statement stat = conn.createStatement();
+
+        ResultSet rs = stat.executeQuery("pragma auto_vacuum");
+        assertEquals("2", rs.getString(1));
+        rs.close();
+
+        stat.close();
+        conn.close();
+    }
 }

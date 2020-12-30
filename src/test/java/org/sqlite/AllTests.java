@@ -40,7 +40,6 @@ import org.sqlite.util.OSInfoTest;
     SQLiteMCSQLInterfaceTest.class,
     SQLiteMCURIInterfaceTest.class,
 
-
 })
 public class AllTests {
 // runs all Tests
