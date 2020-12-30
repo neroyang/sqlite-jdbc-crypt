@@ -10,7 +10,7 @@ import org.junit.Test;
 public class SQLiteConfigTest {
 
     @Test
-    public void toProperites() throws SQLException
+    public void toProperties() throws SQLException
     {
         SQLiteConfig config = new SQLiteConfig();
 
@@ -28,4 +28,14 @@ public class SQLiteConfigTest {
         assertEquals(SQLiteConfig.DateClass.REAL.name(),
             properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()));
     }
+
+    @Test
+    public void busyTimeout() {
+        SQLiteConfig config = new SQLiteConfig();
+
+        assertEquals(3000, config.getBusyTimeout());
+        config.setBusyTimeout(1500);
+        assertEquals(1500, config.getBusyTimeout());
+    }
+
 }

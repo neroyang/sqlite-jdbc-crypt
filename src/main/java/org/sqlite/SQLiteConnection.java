@@ -232,7 +232,7 @@ public abstract class SQLiteConnection
         }
 
         // load the native DB
-        DB db = null;
+        DB db;
         try {
             NativeDB.load();
             db = new NativeDB(url, fileName, config);
