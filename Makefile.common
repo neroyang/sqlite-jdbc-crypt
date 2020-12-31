@@ -101,7 +101,7 @@ Linux-armv7_SQLITE_FLAGS  :=
 
 Linux-android-arm_CC        := $(CROSS_PREFIX)gcc
 Linux-android-arm_STRIP     := $(CROSS_PREFIX)strip
-Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog -std=gnu11 -march=native
+Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog -std=gnu11
 Linux-android-arm_LINKFLAGS := -shared -static-libgcc
 Linux-android-arm_LIBNAME   := libsqlitejdbc.so
 Linux-android-arm_SQLITE_FLAGS  :=
